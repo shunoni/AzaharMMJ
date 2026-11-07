@@ -8,6 +8,7 @@
 #include <dynarmic/interface/optimization_flags.h>
 #include "common/assert.h"
 #include "common/microprofile.h"
+#include "common/settings.h"
 #include "core/arm/dynarmic/arm_dynarmic.h"
 #include "core/arm/dynarmic/arm_dynarmic_cp15.h"
 #include "core/arm/dynarmic/arm_exclusive_monitor.h"
@@ -371,14 +372,17 @@ std::unique_ptr<Dynarmic::A32::Jit> ARM_Dynarmic::MakeJit() {
     config.global_monitor = &exclusive_monitor.monitor;
 
     // AGY SPEED OPTIMIZATION: Enable aggressive unsafe optimizations for low-power ARM64
-    config.unsafe_optimizations = true;
-    config.optimizations = config.optimizations |
-                           Dynarmic::OptimizationFlag::Unsafe_ReducedErrorFP |
-                           Dynarmic::OptimizationFlag::Unsafe_InaccurateNaN |
-                           Dynarmic::OptimizationFlag::Unsafe_IgnoreStandardFPCRValue |
-                           Dynarmic::OptimizationFlag::Unsafe_IgnoreGlobalMonitor;
-    config.wall_clock_cntpct = true;
-    config.check_halt_on_memory_access = false;
+    if (Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::values.unsafe_cpu_optimizations.GetValue()) {
+        config.unsafe_optimizations = true;
+        config.optimizations = config.optimizations |
+                               Dynarmic::OptimizationFlag::Unsafe_ReducedErrorFP |
+                               Dynarmic::OptimizationFlag::Unsafe_InaccurateNaN |
+                               Dynarmic::OptimizationFlag::Unsafe_IgnoreStandardFPCRValue |
+                               Dynarmic::OptimizationFlag::Unsafe_IgnoreGlobalMonitor;
+        config.wall_clock_cntpct = true;
+        config.check_halt_on_memory_access = false;
+    }
 
     return std::make_unique<Dynarmic::A32::Jit>(config);
 }

@@ -24,6 +24,56 @@ enum class BooleanSetting(
         Settings.SECTION_DEBUG,
         false
     ),
+    ENABLE_PERFORMANCE_HACKS(
+        SettingKeys.enable_performance_hacks(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_CPU_OPTIMIZATIONS(
+        SettingKeys.unsafe_cpu_optimizations(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    SKIP_SLOW_DRAW_FALLBACK(
+        SettingKeys.skip_slow_draw_fallback(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    FAST_TEXTURE_INVALIDATION(
+        SettingKeys.fast_texture_invalidation(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    FAST_SHADER_PRECISION(
+        SettingKeys.fast_shader_precision(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_SKIP_TEXTURE_FLUSH(
+        SettingKeys.unsafe_skip_texture_flush(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_SKIP_GPU_SYNC(
+        SettingKeys.unsafe_skip_gpu_sync(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_SKIP_MIPMAPS(
+        SettingKeys.unsafe_skip_mipmaps(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_FAST_SHADER_MATH(
+        SettingKeys.unsafe_fast_shader_math(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_SKIP_PAGE_MARKING(
+        SettingKeys.unsafe_skip_page_marking(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
     MII_COMPATIBILITY_FIXES(SettingKeys.mii_compatibility_fixes(), Settings.SECTION_DEBUG, false),
     USE_PER_GAME_SETTINGS(SettingKeys.use_per_game_settings(), Settings.SECTION_DEBUG, false),
     ENABLE_RPC_SERVER(SettingKeys.enable_rpc_server(), Settings.SECTION_DEBUG, false),

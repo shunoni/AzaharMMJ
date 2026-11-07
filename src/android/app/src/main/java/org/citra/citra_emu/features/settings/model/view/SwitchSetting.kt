@@ -29,6 +29,9 @@ class SwitchSetting(
             return setting.boolean
         }
 
+    /** Snapshot of the value when this item was built, used to detect external changes. */
+    val initialChecked: Boolean = isChecked
+
     /**
      * Write a value to the backing boolean.
      *

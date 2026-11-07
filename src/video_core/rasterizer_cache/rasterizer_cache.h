@@ -1031,7 +1031,9 @@ void RasterizerCache<T>::ValidateSurface(SurfaceId surface_id, PAddr addr, u32 s
 
     // Filtered mipmaps often look really bad. We can achieve better quality by
     // generating them from the base level.
-    if (surface.res_scale != 1 && level != 0) {
+    if (surface.res_scale != 1 && level != 0 &&
+        !(Settings::values.enable_performance_hacks.GetValue() &&
+          Settings::values.unsafe_skip_mipmaps.GetValue())) {
         runtime.GenerateMipmaps(surface);
     }
 }
@@ -1127,7 +1129,9 @@ bool RasterizerCache<T>::UploadCustomSurface(SurfaceId surface_id, SurfaceInterv
         }
         Surface& surface = slot_surfaces[surface_id];
         surface.UploadCustom(material, level);
-        if (custom_tex_manager.SkipMipmaps()) {
+        if (custom_tex_manager.SkipMipmaps() &&
+            !(Settings::values.enable_performance_hacks.GetValue() &&
+              Settings::values.unsafe_skip_mipmaps.GetValue())) {
             runtime.GenerateMipmaps(surface);
         }
         return true;
@@ -1269,6 +1273,14 @@ void RasterizerCache<T>::FlushRegion(PAddr addr, u32 size, SurfaceId flush_surfa
         return;
     }
 
+    // AGY SPEED OPTIMIZATION: Skip all GPU->CPU texture readbacks.
+    // This is extremely dangerous for accuracy but removes the most expensive
+    // synchronization path on low-power devices.
+    if (Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::values.unsafe_skip_texture_flush.GetValue()) {
+        return;
+    }
+
     const SurfaceInterval flush_interval(addr, addr + size);
     SurfaceRegions flushed_intervals;
 
@@ -1339,7 +1351,9 @@ void RasterizerCache<T>::InvalidateRegion(PAddr addr, u32 size, SurfaceId region
         // If the CPU is invalidating this region we want to remove it
         // to (likely) mark the memory pages as uncached
         if (!region_owner_id && size <= 8) {
-            if (Settings::values.mii_compatibility_fixes.GetValue()) {
+            if (Settings::values.mii_compatibility_fixes.GetValue() ||
+                !Settings::values.enable_performance_hacks.GetValue() ||
+                !Settings::values.fast_texture_invalidation.GetValue()) {
                 // Preserve GPU-rendered bytes before a game partially updates this memory on CPU.
                 FlushRegion(surface.addr, surface.size, surface_id);
             }
@@ -1456,6 +1470,14 @@ void RasterizerCache<T>::UnregisterAll() {
 
 template <class T>
 void RasterizerCache<T>::UpdatePagesCachedCount(PAddr addr, u32 size, int delta) {
+    // AGY SPEED OPTIMIZATION: Skip cached-page reference tracking entirely. The
+    // backing memory pages are never switched to rasterizer-cached pages, which
+    // avoids all page table churn at the cost of CPU/GPU coherence.
+    if (Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::values.unsafe_skip_page_marking.GetValue()) {
+        return;
+    }
+
     const u32 num_pages =
         ((addr + size - 1) >> Memory::CITRA_PAGE_BITS) - (addr >> Memory::CITRA_PAGE_BITS) + 1;
     const u32 page_start = addr >> Memory::CITRA_PAGE_BITS;

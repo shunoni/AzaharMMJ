@@ -108,6 +108,16 @@ object SettingKeys {
     external fun gdbstub_port(): String
     external fun instant_debug_log(): String
     external fun prevent_frame_limiter_catch_up(): String
+    external fun enable_performance_hacks(): String
+    external fun unsafe_cpu_optimizations(): String
+    external fun skip_slow_draw_fallback(): String
+    external fun fast_texture_invalidation(): String
+    external fun fast_shader_precision(): String
+    external fun unsafe_skip_texture_flush(): String
+    external fun unsafe_skip_gpu_sync(): String
+    external fun unsafe_skip_mipmaps(): String
+    external fun unsafe_fast_shader_math(): String
+    external fun unsafe_skip_page_marking(): String
     external fun mii_compatibility_fixes(): String
     external fun use_per_game_settings(): String
     external fun enable_rpc_server(): String

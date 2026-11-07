@@ -16,6 +16,8 @@ class Settings {
 
     var isLoaded = false
 
+    private var loadedGeneration = 0
+
     /**
      * A HashMap<String></String>, SettingSection> that constructs a new SettingSection instead of returning null
      * when getting a key not already in the map
@@ -39,6 +41,7 @@ class Settings {
         get() = sections.isEmpty()
 
     fun loadSettings(view: SettingsActivityView? = null) {
+        val generation = ++loadGeneration
         sections = SettingsSectionMap()
         // Clear values left by a previous game's overrides before loading the global baseline.
         BooleanSetting.clear()
@@ -71,6 +74,19 @@ class Settings {
             }
         }
         isLoaded = true
+        loadedGeneration = generation
+    }
+
+    /**
+     * Reloads settings if another [Settings] instance loaded since this one, since all
+     * settings share global backing objects that would otherwise be overwritten.
+     */
+    fun reloadIfStale(view: SettingsActivityView? = null): Boolean {
+        if (isLoaded && loadedGeneration != loadGeneration) {
+            loadSettings(view)
+            return true
+        }
+        return false
     }
 
     private fun loadCitraSettings(view: SettingsActivityView?) {
@@ -147,6 +163,8 @@ class Settings {
     }
 
     companion object {
+        private var loadGeneration = 0
+
         const val SECTION_CORE = "Core"
         const val SECTION_SYSTEM = "System"
         const val SECTION_CAMERA = "Camera"
@@ -157,6 +175,7 @@ class Settings {
         const val SECTION_NETWORK = "WebService"
         const val SECTION_AUDIO = "Audio"
         const val SECTION_DEBUG = "Debugging"
+        const val SECTION_HACKS = "Hacks"
         const val SECTION_THEME = "Theme"
         const val SECTION_CUSTOM_LANDSCAPE = "Custom Landscape Layout"
         const val SECTION_CUSTOM_PORTRAIT = "Custom Portrait Layout"

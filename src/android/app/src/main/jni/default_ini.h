@@ -597,6 +597,53 @@ static const char* android_config_default_file_content = (BOOST_HANA_STRING(R"(
 # 0 (default): Off, 1: On
 )") DECLARE_KEY(prevent_frame_limiter_catch_up) BOOST_HANA_STRING(R"(
 
+# Master switch for all performance hacks below. When disabled, every hack is forced off
+# regardless of its individual setting.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(enable_performance_hacks) BOOST_HANA_STRING(R"(
+
+# Enable unsafe CPU JIT optimizations that trade accuracy for speed
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_cpu_optimizations) BOOST_HANA_STRING(R"(
+
+# Skip the slow software vertex fallback when hardware accelerated drawing fails
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(skip_slow_draw_fallback) BOOST_HANA_STRING(R"(
+
+# Skip CPU texture flushes when invalidating GPU surfaces
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(fast_texture_invalidation) BOOST_HANA_STRING(R"(
+
+# Use medium precision in GLES shaders for faster GPU execution
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(fast_shader_precision) BOOST_HANA_STRING(R"(
+
+# Skip GPU->CPU texture readbacks entirely. Drastically faster but breaks anything
+# that reads rendered output from the CPU (screenshots, some effects, texture uploads).
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_skip_texture_flush) BOOST_HANA_STRING(R"(
+
+# Skip OpenGL fences and memory barriers used for cross-frame synchronization.
+# Reduces GPU stalls at the cost of tearing and graphical corruption.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_skip_gpu_sync) BOOST_HANA_STRING(R"(
+
+# Skip GPU mipmap generation. Faster on low-end GPUs but causes shimmering and
+# incorrect sampling of scaled/filtered textures.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_skip_mipmaps) BOOST_HANA_STRING(R"(
+
+# Use approximate reciprocal/square-root and skip 0*inf NaN sanitization in the
+# AArch64 shader JIT. Much faster shader code on weak CPUs with lower accuracy.
+# Restart required.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_fast_shader_math) BOOST_HANA_STRING(R"(
+
+# Skip marking pages as rasterizer-cached, avoiding page table churn. CPU and GPU
+# memory are no longer kept coherent, which can cause stale textures. Restart required.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_skip_page_marking) BOOST_HANA_STRING(R"(
+
 # Delay the start of apps when LLE modules are enabled
 # 0: Off, 1 (default): On
 )") DECLARE_KEY(delay_start_for_lle_modules) BOOST_HANA_STRING(R"(

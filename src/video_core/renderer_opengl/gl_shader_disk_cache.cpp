@@ -40,6 +40,12 @@ ShaderCacheVersionHash GetShaderCacheVersionHash() {
     ShaderCacheVersionHash hash{};
     const std::size_t length = std::min(std::strlen(Common::g_shader_cache_version), hash.size());
     std::memcpy(hash.data(), Common::g_shader_cache_version, length);
+    // Mix in shader-affecting settings so toggling them also invalidates precompiled binaries.
+    // The transferable cache key already includes this hash, but non-separable drivers load
+    // precompiled programs without validating per-entry keys.
+    const u64 settings_hash = Settings::GetShaderCacheSettingsHash();
+    std::memcpy(hash.data() + hash.size() - sizeof(settings_hash), &settings_hash,
+                sizeof(settings_hash));
     return hash;
 }
 

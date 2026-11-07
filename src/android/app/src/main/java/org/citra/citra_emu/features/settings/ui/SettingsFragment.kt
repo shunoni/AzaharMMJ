@@ -97,8 +97,8 @@ class SettingsFragment :
         activityView!!.onSettingChanged()
     }
 
-    override fun onPerGameSettingsChanged() {
-        fragmentPresenter.onPerGameSettingsChanged()
+    override fun onPerGameSettingsChanged(enabled: Boolean) {
+        fragmentPresenter.onPerGameSettingsChanged(enabled)
     }
 
     private fun setInsets() {

@@ -115,6 +115,8 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
 
             Settings.SECTION_DEBUG -> addDebugSettings(sl)
 
+            Settings.SECTION_HACKS -> addHacksSettings(sl)
+
             Settings.SECTION_THEME -> addThemeSettings(sl)
 
             Settings.SECTION_CUSTOM_LANDSCAPE -> addCustomLandscapeSettings(sl)
@@ -132,10 +134,17 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
         fragmentView.showSettingsList(settingsList!!)
     }
 
-    fun onPerGameSettingsChanged() {
+    fun onPerGameSettingsChanged(enabled: Boolean) {
         if (TextUtils.isEmpty(gameId)) {
             return
         }
+
+        // Keep the in-memory state authoritative while the UI updates. The per-game
+        // file can be momentarily unreadable right after being created via SAF.
+        BooleanSetting.USE_PER_GAME_SETTINGS.boolean = enabled
+        settings.getSection(Settings.SECTION_DEBUG)
+            ?.putSetting(BooleanSetting.USE_PER_GAME_SETTINGS)
+
         if (!SettingsFile.saveCustomGameSetting(gameId, BooleanSetting.USE_PER_GAME_SETTINGS)) {
             fragmentView.showToastMessage(
                 CitraApplication.appContext.getString(
@@ -145,10 +154,14 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                 ),
                 true
             )
-            return
         }
 
         settings.loadSettings(gameId, settingsActivity)
+
+        // Do not let a stale read-back flip the switch the user just changed.
+        BooleanSetting.USE_PER_GAME_SETTINGS.boolean = enabled
+        settings.getSection(Settings.SECTION_DEBUG)
+            ?.putSetting(BooleanSetting.USE_PER_GAME_SETTINGS)
         loadSettingsList()
     }
 
@@ -172,6 +185,17 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
     private fun addConfigSettings(sl: ArrayList<SettingsItem>) {
         settingsActivity.setToolbarTitle(settingsActivity.getString(R.string.preferences_settings))
         sl.apply {
+            if (!TextUtils.isEmpty(gameId)) {
+                add(
+                    SwitchSetting(
+                        BooleanSetting.USE_PER_GAME_SETTINGS,
+                        R.string.use_per_game_settings,
+                        R.string.use_per_game_settings_description,
+                        BooleanSetting.USE_PER_GAME_SETTINGS.key,
+                        BooleanSetting.USE_PER_GAME_SETTINGS.defaultValue
+                    )
+                )
+            }
             add(
                 SubmenuSetting(
                     R.string.preferences_general,
@@ -242,6 +266,14 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     0,
                     R.drawable.ic_code,
                     Settings.SECTION_DEBUG
+                )
+            )
+            add(
+                SubmenuSetting(
+                    R.string.preferences_hacks,
+                    0,
+                    R.drawable.ic_hacks,
+                    Settings.SECTION_HACKS
                 )
             )
 
@@ -1210,17 +1242,6 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
             add(HeaderSetting(R.string.advanced))
             add(
                 SingleChoiceSetting(
-                    IntSetting.FRAME_SKIP_MODE,
-                    R.string.frame_skip_mode,
-                    R.string.frame_skip_mode_description,
-                    R.array.frameSkipModeNames,
-                    R.array.frameSkipModeValues,
-                    IntSetting.FRAME_SKIP_MODE.key,
-                    IntSetting.FRAME_SKIP_MODE.defaultValue
-                )
-            )
-            add(
-                SingleChoiceSetting(
                     IntSetting.TEXTURE_SAMPLING,
                     R.string.texture_sampling_name,
                     R.string.texture_sampling_description,
@@ -1228,15 +1249,6 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     R.array.textureSamplingValues,
                     IntSetting.TEXTURE_SAMPLING.key,
                     IntSetting.TEXTURE_SAMPLING.defaultValue
-                )
-            )
-            add(
-                SwitchSetting(
-                    BooleanSetting.USE_SKIP_DUPLICATE_FRAMES,
-                    R.string.use_skip_duplicate_frames,
-                    R.string.use_skip_duplicate_frames_description,
-                    BooleanSetting.USE_SKIP_DUPLICATE_FRAMES.key,
-                    BooleanSetting.USE_SKIP_DUPLICATE_FRAMES.defaultValue
                 )
             )
 
@@ -1919,21 +1931,145 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
         }
     }
 
+    private fun addHacksSettings(sl: ArrayList<SettingsItem>) {
+        settingsActivity.setToolbarTitle(settingsActivity.getString(R.string.preferences_hacks))
+        sl.apply {
+            add(HeaderSetting(R.string.hacks_warning))
+            add(
+                SwitchSetting(
+                    BooleanSetting.SIMULATE_3DS_GPU_TIMINGS,
+                    R.string.simulate_3ds_gpu_timings,
+                    R.string.simulate_3ds_gpu_timings_description,
+                    BooleanSetting.SIMULATE_3DS_GPU_TIMINGS.key,
+                    BooleanSetting.SIMULATE_3DS_GPU_TIMINGS.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.PREVENT_FRAME_LIMITER_CATCH_UP,
+                    R.string.prevent_frame_limiter_catch_up,
+                    R.string.prevent_frame_limiter_catch_up_description,
+                    BooleanSetting.PREVENT_FRAME_LIMITER_CATCH_UP.key,
+                    BooleanSetting.PREVENT_FRAME_LIMITER_CATCH_UP.defaultValue
+                )
+            )
+            add(
+                SingleChoiceSetting(
+                    IntSetting.FRAME_SKIP_MODE,
+                    R.string.frame_skip_mode,
+                    R.string.frame_skip_mode_description,
+                    R.array.frameSkipModeNames,
+                    R.array.frameSkipModeValues,
+                    IntSetting.FRAME_SKIP_MODE.key,
+                    IntSetting.FRAME_SKIP_MODE.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.USE_SKIP_DUPLICATE_FRAMES,
+                    R.string.use_skip_duplicate_frames,
+                    R.string.use_skip_duplicate_frames_description,
+                    BooleanSetting.USE_SKIP_DUPLICATE_FRAMES.key,
+                    BooleanSetting.USE_SKIP_DUPLICATE_FRAMES.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.ENABLE_PERFORMANCE_HACKS,
+                    R.string.enable_performance_hacks,
+                    R.string.enable_performance_hacks_description,
+                    BooleanSetting.ENABLE_PERFORMANCE_HACKS.key,
+                    BooleanSetting.ENABLE_PERFORMANCE_HACKS.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_CPU_OPTIMIZATIONS,
+                    R.string.unsafe_cpu_optimizations,
+                    R.string.unsafe_cpu_optimizations_description,
+                    BooleanSetting.UNSAFE_CPU_OPTIMIZATIONS.key,
+                    BooleanSetting.UNSAFE_CPU_OPTIMIZATIONS.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.SKIP_SLOW_DRAW_FALLBACK,
+                    R.string.skip_slow_draw_fallback,
+                    R.string.skip_slow_draw_fallback_description,
+                    BooleanSetting.SKIP_SLOW_DRAW_FALLBACK.key,
+                    BooleanSetting.SKIP_SLOW_DRAW_FALLBACK.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.FAST_TEXTURE_INVALIDATION,
+                    R.string.fast_texture_invalidation,
+                    R.string.fast_texture_invalidation_description,
+                    BooleanSetting.FAST_TEXTURE_INVALIDATION.key,
+                    BooleanSetting.FAST_TEXTURE_INVALIDATION.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.FAST_SHADER_PRECISION,
+                    R.string.fast_shader_precision,
+                    R.string.fast_shader_precision_description,
+                    BooleanSetting.FAST_SHADER_PRECISION.key,
+                    BooleanSetting.FAST_SHADER_PRECISION.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_SKIP_TEXTURE_FLUSH,
+                    R.string.unsafe_skip_texture_flush,
+                    R.string.unsafe_skip_texture_flush_description,
+                    BooleanSetting.UNSAFE_SKIP_TEXTURE_FLUSH.key,
+                    BooleanSetting.UNSAFE_SKIP_TEXTURE_FLUSH.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_SKIP_GPU_SYNC,
+                    R.string.unsafe_skip_gpu_sync,
+                    R.string.unsafe_skip_gpu_sync_description,
+                    BooleanSetting.UNSAFE_SKIP_GPU_SYNC.key,
+                    BooleanSetting.UNSAFE_SKIP_GPU_SYNC.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_SKIP_MIPMAPS,
+                    R.string.unsafe_skip_mipmaps,
+                    R.string.unsafe_skip_mipmaps_description,
+                    BooleanSetting.UNSAFE_SKIP_MIPMAPS.key,
+                    BooleanSetting.UNSAFE_SKIP_MIPMAPS.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_FAST_SHADER_MATH,
+                    R.string.unsafe_fast_shader_math,
+                    R.string.unsafe_fast_shader_math_description,
+                    BooleanSetting.UNSAFE_FAST_SHADER_MATH.key,
+                    BooleanSetting.UNSAFE_FAST_SHADER_MATH.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_SKIP_PAGE_MARKING,
+                    R.string.unsafe_skip_page_marking,
+                    R.string.unsafe_skip_page_marking_description,
+                    BooleanSetting.UNSAFE_SKIP_PAGE_MARKING.key,
+                    BooleanSetting.UNSAFE_SKIP_PAGE_MARKING.defaultValue
+                )
+            )
+        }
+    }
+
     private fun addDebugSettings(sl: ArrayList<SettingsItem>) {
         settingsActivity.setToolbarTitle(settingsActivity.getString(R.string.preferences_debug))
         sl.apply {
             add(HeaderSetting(R.string.debug_warning))
-            if (!TextUtils.isEmpty(gameId)) {
-                add(
-                    SwitchSetting(
-                        BooleanSetting.USE_PER_GAME_SETTINGS,
-                        R.string.use_per_game_settings,
-                        R.string.use_per_game_settings_description,
-                        BooleanSetting.USE_PER_GAME_SETTINGS.key,
-                        BooleanSetting.USE_PER_GAME_SETTINGS.defaultValue
-                    )
-                )
-            }
             add(
                 SliderSetting(
                     IntSetting.CPU_CLOCK_SPEED,
@@ -1993,15 +2129,6 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
             )
             add(
                 SwitchSetting(
-                    BooleanSetting.SIMULATE_3DS_GPU_TIMINGS,
-                    R.string.simulate_3ds_gpu_timings,
-                    R.string.simulate_3ds_gpu_timings_description,
-                    BooleanSetting.SIMULATE_3DS_GPU_TIMINGS.key,
-                    BooleanSetting.SIMULATE_3DS_GPU_TIMINGS.defaultValue
-                )
-            )
-            add(
-                SwitchSetting(
                     BooleanSetting.DEBUG_RENDERER,
                     R.string.renderer_debug,
                     R.string.renderer_debug_description,
@@ -2016,15 +2143,6 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     R.string.instant_debug_log_description,
                     BooleanSetting.INSTANT_DEBUG_LOG.key,
                     BooleanSetting.INSTANT_DEBUG_LOG.defaultValue
-                )
-            )
-            add(
-                SwitchSetting(
-                    BooleanSetting.PREVENT_FRAME_LIMITER_CATCH_UP,
-                    R.string.prevent_frame_limiter_catch_up,
-                    R.string.prevent_frame_limiter_catch_up_description,
-                    BooleanSetting.PREVENT_FRAME_LIMITER_CATCH_UP.key,
-                    BooleanSetting.PREVENT_FRAME_LIMITER_CATCH_UP.defaultValue
                 )
             )
             add(

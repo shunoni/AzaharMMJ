@@ -58,5 +58,5 @@ interface SettingsFragmentView {
     fun onSettingChanged()
 
     /** Reload settings from the correct global or per-game source after its mode changes. */
-    fun onPerGameSettingsChanged()
+    fun onPerGameSettingsChanged(enabled: Boolean)
 }

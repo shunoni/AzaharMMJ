@@ -36,6 +36,11 @@ static u64 GetUniqueIdentifier(const Pica::RegsInternal& regs, const ProgramCode
     if (code.size() > 0) {
         u64 code_uid = Common::ComputeHash64(code.data(), code.size() * sizeof(u32));
         hash = Common::HashCombine(hash, code_uid);
+    } else {
+        // Fragment shader source depends on these settings, so they must be part of the cache
+        // key. Otherwise a shader generated with one precision configuration is reused after
+        // the setting is toggled.
+        hash = Common::HashCombine(hash, Settings::GetShaderCacheSettingsHash());
     }
 
     return hash;

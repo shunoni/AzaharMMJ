@@ -186,7 +186,10 @@ class SettingsAdapter(private val fragmentView: SettingsFragmentView, public val
                     }
 
                     SettingsItem.TYPE_SWITCH -> {
-                        (oldItem as SwitchSetting).isEnabled == (newItem as SwitchSetting).isEnabled
+                        val oldSwitch = oldItem as SwitchSetting
+                        val newSwitch = newItem as SwitchSetting
+                        oldSwitch.isEnabled == newSwitch.isEnabled &&
+                            oldSwitch.initialChecked == newSwitch.initialChecked
                     }
 
                     SettingsItem.TYPE_SINGLE_CHOICE -> {
@@ -231,7 +234,7 @@ class SettingsAdapter(private val fragmentView: SettingsFragmentView, public val
         fragmentView.onSettingChanged()
 
         if (setting.key == BooleanSetting.USE_PER_GAME_SETTINGS.key) {
-            fragmentView.onPerGameSettingsChanged()
+            fragmentView.onPerGameSettingsChanged(checked)
             return
         }
 

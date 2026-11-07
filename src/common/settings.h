@@ -661,6 +661,16 @@ struct Values {
     Setting<bool> mii_compatibility_fixes{false, Keys::mii_compatibility_fixes};
     Setting<bool> use_per_game_settings{false, Keys::use_per_game_settings};
     Setting<bool> prevent_frame_limiter_catch_up{false, Keys::prevent_frame_limiter_catch_up};
+    Setting<bool> enable_performance_hacks{false, Keys::enable_performance_hacks};
+    Setting<bool> unsafe_cpu_optimizations{false, Keys::unsafe_cpu_optimizations};
+    Setting<bool> skip_slow_draw_fallback{false, Keys::skip_slow_draw_fallback};
+    Setting<bool> fast_texture_invalidation{false, Keys::fast_texture_invalidation};
+    Setting<bool> fast_shader_precision{false, Keys::fast_shader_precision};
+    Setting<bool> unsafe_skip_texture_flush{false, Keys::unsafe_skip_texture_flush};
+    Setting<bool> unsafe_skip_gpu_sync{false, Keys::unsafe_skip_gpu_sync};
+    Setting<bool> unsafe_skip_mipmaps{false, Keys::unsafe_skip_mipmaps};
+    Setting<bool> unsafe_fast_shader_math{false, Keys::unsafe_fast_shader_math};
+    Setting<bool> unsafe_skip_page_marking{false, Keys::unsafe_skip_page_marking};
 
     // WebService
     Setting<std::string> web_api_url{"http://88.198.47.46:5000", Keys::web_api_url};
@@ -691,6 +701,9 @@ void SetConfiguringGlobal(bool is_global);
 float Volume();
 
 void LogSettings();
+
+// Hash of the settings that affect generated shader source. Used to invalidate shader caches.
+u64 GetShaderCacheSettingsHash();
 
 // Restore the global state of all applicable settings in the Values struct
 void RestoreGlobalState(bool is_powered_on);

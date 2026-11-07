@@ -156,9 +156,14 @@ object SettingsFile {
         val ini = getCustomGameSettingsFile(gameId, true) ?: return false
         try {
             val context: Context = CitraApplication.appContext
-            val inputStream = context.contentResolver.openInputStream(ini.uri)
-                ?: return false
-            val writer = inputStream.use { Wini(it) }
+            // A freshly created SAF document can briefly fail to open or parse. Fall back
+            // to an in-memory INI instead of refusing to persist the setting.
+            val writer = try {
+                context.contentResolver.openInputStream(ini.uri)?.use { Wini(it) }
+            } catch (e: Exception) {
+                Log.error("[SettingsFile] Error reading game config $gameId.ini: ${e.message}")
+                null
+            } ?: Wini()
             writer.put(mapSectionNameToIni(setting.section!!), setting.key, setting.valueAsString)
             val outputStream = context.contentResolver.openOutputStream(ini.uri, "wt")
                 ?: return false
@@ -299,8 +304,14 @@ object SettingsFile {
             }
             root.createDirectory("GameSettings") ?: return null
         }
-        return directory.findFile("$gameId.ini")
-            ?: if (create) directory.createFile("text/plain", "$gameId.ini") else null
+        val fileName = "$gameId.ini"
+        // Some document providers append an extra extension (for example .txt) when
+        // creating text files. Accept any variant so saves and reads stay consistent.
+        directory.findFile(fileName)?.let { return it }
+        directory.listFiles().firstOrNull {
+            it.name == fileName || it.name?.startsWith("$fileName.") == true
+        }?.let { return it }
+        return if (create) directory.createFile("text/plain", fileName) else null
     }
 
     private fun sectionFromLine(line: String, isCustomGame: Boolean): SettingSection {

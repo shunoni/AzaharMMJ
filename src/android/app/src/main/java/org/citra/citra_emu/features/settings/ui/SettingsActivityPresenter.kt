@@ -53,6 +53,10 @@ class SettingsActivityPresenter(private val activityView: SettingsActivityView) 
             } else {
                 settings.loadSettings(activityView)
             }
+        } else {
+            // Another activity may have reloaded the shared settings while this one was
+            // in the background. Restore our own global/per-game state if that happened.
+            settings.reloadIfStale(activityView)
         }
         activityView.showSettingsFragment(menuTag, false, gameId)
         activityView.onSettingsFileLoaded()
