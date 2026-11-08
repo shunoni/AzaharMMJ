@@ -123,6 +123,9 @@ object SettingKeys {
     external fun unsafe_disable_stencil_test(): String
     external fun unsafe_disable_alpha_blend(): String
     external fun unsafe_skip_texture_copies(): String
+    external fun gl_unsafe_stream_buffer(): String
+    external fun unsafe_skip_unresolved_texture_copies(): String
+    external fun unsafe_trust_cached_textures(): String
     external fun mii_compatibility_fixes(): String
     external fun use_per_game_settings(): String
     external fun enable_rpc_server(): String

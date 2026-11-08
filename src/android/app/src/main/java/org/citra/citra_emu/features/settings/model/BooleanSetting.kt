@@ -99,6 +99,21 @@ enum class BooleanSetting(
         Settings.SECTION_DEBUG,
         false
     ),
+    GL_UNSAFE_STREAM_BUFFER(
+        SettingKeys.gl_unsafe_stream_buffer(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_SKIP_UNRESOLVED_TEXTURE_COPIES(
+        SettingKeys.unsafe_skip_unresolved_texture_copies(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_TRUST_CACHED_TEXTURES(
+        SettingKeys.unsafe_trust_cached_textures(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
     MII_COMPATIBILITY_FIXES(SettingKeys.mii_compatibility_fixes(), Settings.SECTION_DEBUG, false),
     USE_PER_GAME_SETTINGS(SettingKeys.use_per_game_settings(), Settings.SECTION_DEBUG, false),
     ENABLE_RPC_SERVER(SettingKeys.enable_rpc_server(), Settings.SECTION_DEBUG, false),

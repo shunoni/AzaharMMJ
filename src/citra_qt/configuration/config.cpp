@@ -546,6 +546,9 @@ void QtConfig::ReadDebuggingValues() {
     ReadBasicSetting(Settings::values.unsafe_disable_stencil_test);
     ReadBasicSetting(Settings::values.unsafe_disable_alpha_blend);
     ReadBasicSetting(Settings::values.unsafe_skip_texture_copies);
+    ReadBasicSetting(Settings::values.gl_unsafe_stream_buffer);
+    ReadBasicSetting(Settings::values.unsafe_skip_unresolved_texture_copies);
+    ReadBasicSetting(Settings::values.unsafe_trust_cached_textures);
 
     qt_config->beginGroup(QStringLiteral("LLE"));
     for (const auto& service_module : Service::service_module_map) {
@@ -1154,6 +1157,9 @@ void QtConfig::SaveDebuggingValues() {
     WriteBasicSetting(Settings::values.unsafe_disable_stencil_test);
     WriteBasicSetting(Settings::values.unsafe_disable_alpha_blend);
     WriteBasicSetting(Settings::values.unsafe_skip_texture_copies);
+    WriteBasicSetting(Settings::values.gl_unsafe_stream_buffer);
+    WriteBasicSetting(Settings::values.unsafe_skip_unresolved_texture_copies);
+    WriteBasicSetting(Settings::values.unsafe_trust_cached_textures);
 
     qt_config->beginGroup(QStringLiteral("LLE"));
     for (const auto& service_module : Settings::values.lle_modules) {

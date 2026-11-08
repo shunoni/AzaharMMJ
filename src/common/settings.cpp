@@ -199,6 +199,12 @@ void LogSettings() {
                 values.unsafe_disable_alpha_blend.GetValue());
     log_setting("Debugging_UnsafeSkipTextureCopies",
                 values.unsafe_skip_texture_copies.GetValue());
+    log_setting("Debugging_GlUnsafeStreamBuffer",
+                values.gl_unsafe_stream_buffer.GetValue());
+    log_setting("Debugging_UnsafeSkipUnresolvedTextureCopies",
+                values.unsafe_skip_unresolved_texture_copies.GetValue());
+    log_setting("Debugging_UnsafeTrustCachedTextures",
+                values.unsafe_trust_cached_textures.GetValue());
 }
 
 bool IsConfiguringGlobal() {

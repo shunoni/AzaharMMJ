@@ -445,6 +445,14 @@
     <string name="unsafe_skip_texture_copies_description">Skips GPU texture-to-texture copies. Faster, but render-to-texture effects, reflections and some screen effects will be stale or wrong.</string>
     <string name="hacks_extreme">EXTREME</string>
     <string name="hacks_extreme_description">These hacks can boost performance a lot, but they will visibly lower visual quality and can break effects. Only enable them if you really need the extra speed.</string>
+    <string name="hacks_opengl">OpenGL</string>
+    <string name="hacks_opengl_description">OpenGL-focused speed hacks ported from Citra MMJ, plus the matching Vulkan support where it applies. They are off by default; disable any that cause corruption or stale textures.</string>
+    <string name="gl_unsafe_stream_buffer">Unsafe Unsynchronized Stream Buffers (GL)</string>
+    <string name="gl_unsafe_stream_buffer_description">OpenGL only. Skips invalidating streaming buffers when they wrap around, avoiding a driver synchronization point. Can cause corrupted geometry or flickering.</string>
+    <string name="unsafe_skip_unresolved_texture_copies">Skip Unresolved Texture Copies (GL + Vulkan)</string>
+    <string name="unsafe_skip_unresolved_texture_copies_description">Skips texture copies whose source surface cannot be resolved instead of falling back. This matches Citra MMJ\'s per-game optimization for Mario Kart 7 and is much safer than Unsafe Skip Texture Copies.</string>
+    <string name="unsafe_trust_cached_textures">Trust Cached Textures (GL + Vulkan)</string>
+    <string name="unsafe_trust_cached_textures_description">Keeps GPU textures when the CPU writes to the same memory instead of flushing and removing them. Big speedup for texture-streaming games, but textures can go stale.</string>
     <string name="enable_performance_hacks">Enable Performance Hacks</string>
     <string name="enable_performance_hacks_description">Master switch for every performance hack. Turning this off forces all hacks below to behave like stock Azahar without changing their individual toggles. Restart Azahar after changing this setting.</string>
     <string name="mii_compatibility_fixes">Mii Compatibility Fixes</string>

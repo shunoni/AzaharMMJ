@@ -5,6 +5,7 @@
 #include "common/alignment.h"
 #include "common/assert.h"
 #include "common/microprofile.h"
+#include "common/settings.h"
 #include "video_core/renderer_opengl/gl_driver.h"
 #include "video_core/renderer_opengl/gl_stream_buffer.h"
 
@@ -62,12 +63,20 @@ std::tuple<u8*, GLintptr, bool> OGLStreamBuffer::Map(GLsizeiptr size, GLintptr a
         buffer_pos = Common::AlignUp<std::size_t>(buffer_pos, alignment);
     }
 
+    // AGY SPEED OPTIMIZATION (Citra MMJ stream_buffer_hack): when enabled, do not
+    // invalidate array/uniform/element buffers on wraparound. Instead rely on
+    // unsynchronized mapping, trading correctness for fewer driver stalls. The
+    // texture buffers keep the safe invalidate path.
+    const bool unsafe_stream_buffer =
+        Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::values.gl_unsafe_stream_buffer.GetValue() && gl_target != GL_TEXTURE_BUFFER;
+
     bool invalidate = false;
     if (buffer_pos + size > buffer_size) {
         buffer_pos = 0;
-        invalidate = true;
+        invalidate = !unsafe_stream_buffer;
 
-        if (persistent) {
+        if (persistent && invalidate) {
             glUnmapBuffer(gl_target);
         }
     }

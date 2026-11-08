@@ -670,6 +670,23 @@ static const char* android_config_default_file_content = (BOOST_HANA_STRING(R"(
 # 0 (default): Off, 1: On
 )") DECLARE_KEY(unsafe_skip_texture_copies) BOOST_HANA_STRING(R"(
 
+# [OpenGL only] Skip invalidating streaming buffers when they wrap, avoiding a
+# driver synchronization point. Can corrupt geometry or cause flickering.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(gl_unsafe_stream_buffer) BOOST_HANA_STRING(R"(
+
+# Skip texture copies whose source surface cannot be resolved instead of falling
+# back. This is Citra MMJ's safe per-game texture-copy hack (used for Mario Kart 7).
+# Applies to OpenGL and Vulkan.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_skip_unresolved_texture_copies) BOOST_HANA_STRING(R"(
+
+# Keep GPU textures when the CPU writes to the same memory instead of flushing and
+# removing them. Big speedup for texture-streaming games, but textures can go stale.
+# Applies to OpenGL and Vulkan.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_trust_cached_textures) BOOST_HANA_STRING(R"(
+
 # Delay the start of apps when LLE modules are enabled
 # 0: Off, 1 (default): On
 )") DECLARE_KEY(delay_start_for_lle_modules) BOOST_HANA_STRING(R"(

@@ -2109,6 +2109,34 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     BooleanSetting.UNSAFE_DISABLE_ALPHA_BLEND.defaultValue
                 )
             )
+            add(HeaderSetting(R.string.hacks_opengl, R.string.hacks_opengl_description))
+            add(
+                SwitchSetting(
+                    BooleanSetting.GL_UNSAFE_STREAM_BUFFER,
+                    R.string.gl_unsafe_stream_buffer,
+                    R.string.gl_unsafe_stream_buffer_description,
+                    BooleanSetting.GL_UNSAFE_STREAM_BUFFER.key,
+                    BooleanSetting.GL_UNSAFE_STREAM_BUFFER.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_SKIP_UNRESOLVED_TEXTURE_COPIES,
+                    R.string.unsafe_skip_unresolved_texture_copies,
+                    R.string.unsafe_skip_unresolved_texture_copies_description,
+                    BooleanSetting.UNSAFE_SKIP_UNRESOLVED_TEXTURE_COPIES.key,
+                    BooleanSetting.UNSAFE_SKIP_UNRESOLVED_TEXTURE_COPIES.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_TRUST_CACHED_TEXTURES,
+                    R.string.unsafe_trust_cached_textures,
+                    R.string.unsafe_trust_cached_textures_description,
+                    BooleanSetting.UNSAFE_TRUST_CACHED_TEXTURES.key,
+                    BooleanSetting.UNSAFE_TRUST_CACHED_TEXTURES.defaultValue
+                )
+            )
         }
     }
 
