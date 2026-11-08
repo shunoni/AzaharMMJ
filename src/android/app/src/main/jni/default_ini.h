@@ -644,6 +644,32 @@ static const char* android_config_default_file_content = (BOOST_HANA_STRING(R"(
 # 0 (default): Off, 1: On
 )") DECLARE_KEY(unsafe_skip_page_marking) BOOST_HANA_STRING(R"(
 
+# [Vulkan only] Skip heavy draws that were fully hidden behind other geometry in
+# recent frames. Big speedup in 3D scenes, but objects can pop in at screen edges
+# and some effects may flicker.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_cull_occluded_draws) BOOST_HANA_STRING(R"(
+
+# Skip the game's shadow-map rendering passes entirely. Faster, but shadows and
+# some lighting effects will be missing or stale.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_skip_shadow_rendering) BOOST_HANA_STRING(R"(
+
+# Force stencil testing and writes off. Faster on games that use stencil heavily,
+# but outlines, shadow volumes and some effects will render incorrectly.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_disable_stencil_test) BOOST_HANA_STRING(R"(
+
+# Render every draw opaque. Can massively reduce fill cost in transparent-heavy
+# scenes, but transparency, UI and particle effects will look broken.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_disable_alpha_blend) BOOST_HANA_STRING(R"(
+
+# Skip GPU texture-to-texture copies. Faster, but render-to-texture effects,
+# reflections and some screen effects will be stale or wrong.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_skip_texture_copies) BOOST_HANA_STRING(R"(
+
 # Delay the start of apps when LLE modules are enabled
 # 0: Off, 1 (default): On
 )") DECLARE_KEY(delay_start_for_lle_modules) BOOST_HANA_STRING(R"(

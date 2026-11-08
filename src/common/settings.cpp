@@ -189,6 +189,16 @@ void LogSettings() {
     log_setting("Debugging_UnsafeSkipMipmaps", values.unsafe_skip_mipmaps.GetValue());
     log_setting("Debugging_UnsafeFastShaderMath", values.unsafe_fast_shader_math.GetValue());
     log_setting("Debugging_UnsafeSkipPageMarking", values.unsafe_skip_page_marking.GetValue());
+    log_setting("Debugging_UnsafeCullOccludedDraws",
+                values.unsafe_cull_occluded_draws.GetValue());
+    log_setting("Debugging_UnsafeSkipShadowRendering",
+                values.unsafe_skip_shadow_rendering.GetValue());
+    log_setting("Debugging_UnsafeDisableStencilTest",
+                values.unsafe_disable_stencil_test.GetValue());
+    log_setting("Debugging_UnsafeDisableAlphaBlend",
+                values.unsafe_disable_alpha_blend.GetValue());
+    log_setting("Debugging_UnsafeSkipTextureCopies",
+                values.unsafe_skip_texture_copies.GetValue());
 }
 
 bool IsConfiguringGlobal() {

@@ -408,6 +408,11 @@ void Config::ReadValues() {
     ReadSetting("Debugging", Settings::values.unsafe_skip_mipmaps);
     ReadSetting("Debugging", Settings::values.unsafe_fast_shader_math);
     ReadSetting("Debugging", Settings::values.unsafe_skip_page_marking);
+    ReadSetting("Debugging", Settings::values.unsafe_cull_occluded_draws);
+    ReadSetting("Debugging", Settings::values.unsafe_skip_shadow_rendering);
+    ReadSetting("Debugging", Settings::values.unsafe_disable_stencil_test);
+    ReadSetting("Debugging", Settings::values.unsafe_disable_alpha_blend);
+    ReadSetting("Debugging", Settings::values.unsafe_skip_texture_copies);
 
     for (const auto& service_module : Service::service_module_map) {
         bool use_lle =

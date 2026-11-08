@@ -118,6 +118,11 @@ object SettingKeys {
     external fun unsafe_skip_mipmaps(): String
     external fun unsafe_fast_shader_math(): String
     external fun unsafe_skip_page_marking(): String
+    external fun unsafe_cull_occluded_draws(): String
+    external fun unsafe_skip_shadow_rendering(): String
+    external fun unsafe_disable_stencil_test(): String
+    external fun unsafe_disable_alpha_blend(): String
+    external fun unsafe_skip_texture_copies(): String
     external fun mii_compatibility_fixes(): String
     external fun use_per_game_settings(): String
     external fun enable_rpc_server(): String

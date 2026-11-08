@@ -186,6 +186,13 @@ bool RasterizerCache<T>::AccelerateTextureCopy(const Pica::DisplayTransferConfig
     const DebugScope scope{runtime, Common::Vec4f{0.f, 0.f, 1.f, 1.f},
                            "RasterizerCache::AccelerateTextureCopy ({})", config.DebugName()};
 
+    // AGY SPEED OPTIMIZATION: Skip GPU texture-to-texture copies entirely.
+    // Render-to-texture effects reuse stale contents but the emulator keeps going.
+    if (Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::values.unsafe_skip_texture_copies.GetValue()) {
+        return true;
+    }
+
     // Texture copy size is aligned to 16 byte units
     const u32 copy_size = Common::AlignDown(config.texture_copy.size, 16);
     if (copy_size == 0) {
