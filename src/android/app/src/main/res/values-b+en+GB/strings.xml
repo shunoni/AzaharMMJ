@@ -392,7 +392,7 @@
     <string name="hacks_extreme">EXTREME</string>
     <string name="hacks_extreme_description">These hacks can boost performance a lot, but they will visibly lower visual quality and can break effects. Only enable them if you really need the extra speed.</string>
     <string name="hacks_opengl">OpenGL</string>
-    <string name="hacks_opengl_description">OpenGL-focused speed hacks ported from Citra MMJ, plus the matching Vulkan support where it applies. They are off by default; disable any that cause corruption or stale textures.</string>
+    <string name="hacks_opengl_description">OpenGL-exclusive speed hacks. These only apply when using the OpenGL renderer. They are off by default; disable any that cause corruption or stale textures.</string>
     <string name="gl_unsafe_stream_buffer">Unsafe Unsynchronized Stream Buffers (GL)</string>
     <string name="gl_unsafe_stream_buffer_description">OpenGL only. Skips invalidating streaming buffers when they wrap around, avoiding a driver synchronization point. Can cause corrupted geometry or flickering.</string>
     <string name="unsafe_skip_unresolved_texture_copies">Skip Unresolved Texture Copies (GL + Vulkan)</string>
