@@ -2063,6 +2063,80 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     BooleanSetting.UNSAFE_SKIP_PAGE_MARKING.defaultValue
                 )
             )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_CULL_OCCLUDED_DRAWS,
+                    R.string.unsafe_cull_occluded_draws,
+                    R.string.unsafe_cull_occluded_draws_description,
+                    BooleanSetting.UNSAFE_CULL_OCCLUDED_DRAWS.key,
+                    BooleanSetting.UNSAFE_CULL_OCCLUDED_DRAWS.defaultValue
+                )
+            )
+            add(HeaderSetting(R.string.hacks_extreme, R.string.hacks_extreme_description))
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_SKIP_SHADOW_RENDERING,
+                    R.string.unsafe_skip_shadow_rendering,
+                    R.string.unsafe_skip_shadow_rendering_description,
+                    BooleanSetting.UNSAFE_SKIP_SHADOW_RENDERING.key,
+                    BooleanSetting.UNSAFE_SKIP_SHADOW_RENDERING.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_DISABLE_STENCIL_TEST,
+                    R.string.unsafe_disable_stencil_test,
+                    R.string.unsafe_disable_stencil_test_description,
+                    BooleanSetting.UNSAFE_DISABLE_STENCIL_TEST.key,
+                    BooleanSetting.UNSAFE_DISABLE_STENCIL_TEST.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_DISABLE_ALPHA_BLEND,
+                    R.string.unsafe_disable_alpha_blend,
+                    R.string.unsafe_disable_alpha_blend_description,
+                    BooleanSetting.UNSAFE_DISABLE_ALPHA_BLEND.key,
+                    BooleanSetting.UNSAFE_DISABLE_ALPHA_BLEND.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_SKIP_TEXTURE_COPIES,
+                    R.string.unsafe_skip_texture_copies,
+                    R.string.unsafe_skip_texture_copies_description,
+                    BooleanSetting.UNSAFE_SKIP_TEXTURE_COPIES.key,
+                    BooleanSetting.UNSAFE_SKIP_TEXTURE_COPIES.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_SKIP_UNRESOLVED_TEXTURE_COPIES,
+                    R.string.unsafe_skip_unresolved_texture_copies,
+                    R.string.unsafe_skip_unresolved_texture_copies_description,
+                    BooleanSetting.UNSAFE_SKIP_UNRESOLVED_TEXTURE_COPIES.key,
+                    BooleanSetting.UNSAFE_SKIP_UNRESOLVED_TEXTURE_COPIES.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
+                    BooleanSetting.UNSAFE_TRUST_CACHED_TEXTURES,
+                    R.string.unsafe_trust_cached_textures,
+                    R.string.unsafe_trust_cached_textures_description,
+                    BooleanSetting.UNSAFE_TRUST_CACHED_TEXTURES.key,
+                    BooleanSetting.UNSAFE_TRUST_CACHED_TEXTURES.defaultValue
+                )
+            )
+            add(HeaderSetting(R.string.hacks_opengl, R.string.hacks_opengl_description))
+            add(
+                SwitchSetting(
+                    BooleanSetting.GL_UNSAFE_STREAM_BUFFER,
+                    R.string.gl_unsafe_stream_buffer,
+                    R.string.gl_unsafe_stream_buffer_description,
+                    BooleanSetting.GL_UNSAFE_STREAM_BUFFER.key,
+                    BooleanSetting.GL_UNSAFE_STREAM_BUFFER.defaultValue
+                )
+            )
         }
     }
 

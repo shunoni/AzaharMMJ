@@ -2,6 +2,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the misc/licenses/gplv2.txt file included.
 
+#include <limits>
+
 #include "common/alignment.h"
 #include "common/literals.h"
 #include "common/logging/log.h"
@@ -38,6 +40,14 @@ constexpr u64 TEXTURE_BUFFER_SIZE = 2_MiB;
 
 constexpr vk::BufferUsageFlags BUFFER_USAGE =
     vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eIndexBuffer;
+
+// Occlusion culling speed hack tuning. Only heavy accelerated draws are tested,
+// and a mesh found fully hidden is skipped for a handful of presented frames.
+constexpr u32 OCCLUSION_QUERY_COUNT = 4096;
+constexpr u32 OCCLUSION_MIN_VERTICES = 300;
+constexpr u64 OCCLUSION_HIDDEN_FRAMES = 6;
+constexpr u32 OCCLUSION_MAX_MESHES = 8192;
+constexpr u32 INVALID_OCCLUSION_QUERY = std::numeric_limits<u32>::max();
 
 struct DrawParams {
     u32 vertex_count;
@@ -109,6 +119,13 @@ RasterizerVulkan::RasterizerVulkan(Memory::MemorySystem& memory, Pica::PicaCore&
         .range = VK_WHOLE_SIZE,
     });
 
+    // Occlusion queries used by the optional Vulkan draw-culling speed hack.
+    occlusion_pool_size = OCCLUSION_QUERY_COUNT;
+    occlusion_pool = device.createQueryPoolUnique({
+        .queryType = vk::QueryType::eOcclusion,
+        .queryCount = occlusion_pool_size,
+    });
+
     scheduler.RegisterOnSubmit([&renderpass_cache] { renderpass_cache.EndRendering(); });
 
     // Prepare the static buffer descriptor set.
@@ -144,6 +161,7 @@ RasterizerVulkan::~RasterizerVulkan() = default;
 
 void RasterizerVulkan::TickFrame() {
     scheduler.WaitWorker();
+    UpdateOcclusion();
     res_cache.TickFrame();
 }
 
@@ -172,13 +190,18 @@ void RasterizerVulkan::LoadDefaultDiskResources(
 void RasterizerVulkan::SyncDrawState() {
     SyncDrawUniforms();
 
+    const bool perf_hacks = Settings::values.enable_performance_hacks.GetValue();
+
     // SyncCullMode();
     pipeline_info.state.rasterization.cull_mode.Assign(regs.rasterizer.cull_mode);
     // If the framebuffer is flipped, request to also flip vulkan viewport
     const bool is_flipped = regs.framebuffer.framebuffer.IsFlipped();
     pipeline_info.state.rasterization.flip_viewport.Assign(is_flipped);
     // SyncBlendEnabled();
-    pipeline_info.state.blending.blend_enable = regs.framebuffer.output_merger.alphablend_enable;
+    // AGY SPEED OPTIMIZATION: force every draw opaque.
+    pipeline_info.state.blending.blend_enable =
+        regs.framebuffer.output_merger.alphablend_enable &&
+        !(perf_hacks && Settings::values.unsafe_disable_alpha_blend.GetValue());
     // SyncBlendFuncs();
     pipeline_info.state.blending.color_blend_eq.Assign(
         regs.framebuffer.output_merger.alpha_blending.blend_equation_rgb);
@@ -205,8 +228,11 @@ void RasterizerVulkan::SyncDrawState() {
 
     // SyncStencilTest();
     const auto& stencil_test = regs.framebuffer.output_merger.stencil_test;
-    const bool test_enable = stencil_test.enable && regs.framebuffer.framebuffer.depth_format ==
-                                                        Pica::FramebufferRegs::DepthFormat::D24S8;
+    // AGY SPEED OPTIMIZATION: force stencil testing and writes off.
+    const bool test_enable =
+        stencil_test.enable &&
+        regs.framebuffer.framebuffer.depth_format == Pica::FramebufferRegs::DepthFormat::D24S8 &&
+        !(perf_hacks && Settings::values.unsafe_disable_stencil_test.GetValue());
 
     pipeline_info.state.depth_stencil.stencil_test_enable.Assign(test_enable);
     pipeline_info.state.depth_stencil.stencil_fail_op.Assign(stencil_test.action_stencil_fail);
@@ -429,6 +455,13 @@ bool RasterizerVulkan::SetupGeometryShader() {
 }
 
 bool RasterizerVulkan::AccelerateDrawBatch(bool is_indexed) {
+    // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes before
+    // any vertex analysis or upload work is done.
+    if (regs.framebuffer.IsShadowRendering() &&
+        Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
+        return true;
+    }
     if (regs.pipeline.use_gs != Pica::PipelineRegs::UseGS::No) {
         if (regs.pipeline.gs_config.mode != Pica::PipelineRegs::GSMode::Point) {
             return false;
@@ -465,7 +498,8 @@ bool RasterizerVulkan::AccelerateDrawBatch(bool is_indexed) {
     return Draw(true, is_indexed);
 }
 
-bool RasterizerVulkan::AccelerateDrawBatchInternal(bool is_indexed) {
+bool RasterizerVulkan::AccelerateDrawBatchInternal(bool is_indexed, u64 occlusion_key,
+                                                   bool occlusion_eligible) {
     if (is_indexed) {
         SetupIndexArray();
     }
@@ -483,15 +517,25 @@ bool RasterizerVulkan::AccelerateDrawBatchInternal(bool is_indexed) {
         .is_indexed = is_indexed,
     };
 
-    scheduler.Record([this, params](vk::CommandBuffer cmdbuf) {
+    const u32 query = occlusion_eligible ? AcquireOcclusionQuery(occlusion_key)
+                                         : INVALID_OCCLUSION_QUERY;
+    const vk::QueryPool pool = *occlusion_pool;
+
+    scheduler.Record([this, params, query, pool](vk::CommandBuffer cmdbuf) {
         std::array<vk::DeviceSize, 16> offsets;
         std::transform(params.bindings.begin(), params.bindings.end(), offsets.begin(),
                        [](u32 offset) { return static_cast<vk::DeviceSize>(offset); });
         cmdbuf.bindVertexBuffers(0, params.binding_count, vertex_buffers.data(), offsets.data());
+        if (query != INVALID_OCCLUSION_QUERY) {
+            cmdbuf.beginQuery(pool, query, {});
+        }
         if (params.is_indexed) {
             cmdbuf.drawIndexed(params.vertex_count, 1, 0, params.vertex_offset, 0);
         } else {
             cmdbuf.draw(params.vertex_count, 1, 0, 0);
+        }
+        if (query != INVALID_OCCLUSION_QUERY) {
+            cmdbuf.endQuery(pool, query);
         }
     });
 
@@ -527,6 +571,164 @@ void RasterizerVulkan::SetupIndexArray() {
         });
 }
 
+// Optional Vulkan draw-culling speed hack. Every heavy accelerated draw is wrapped
+// in a host occlusion query. Once per presented frame the results are polled with
+// no GPU stall; a mesh that produced no samples is then skipped for a handful of
+// frames. Meshes seen more than once in the same frame are never culled because
+// the key cannot distinguish their instances.
+bool RasterizerVulkan::OcclusionEligible(const Framebuffer* framebuffer) const {
+    if (!Settings::values.enable_performance_hacks.GetValue() ||
+        !Settings::values.unsafe_cull_occluded_draws.GetValue()) {
+        return false;
+    }
+    // The pool is only safe to use once it has been reset after the previous batch.
+    if (!occlusion_pool_ready) {
+        return false;
+    }
+    // Shadow passes render from a different vantage and feed a texture, so never skip them.
+    if (regs.framebuffer.IsShadowRendering()) {
+        return false;
+    }
+    // Geometry shaders expand points and are not worth the risk.
+    if (regs.pipeline.use_gs != Pica::PipelineRegs::UseGS::No) {
+        return false;
+    }
+    // Testing tiny draws costs more than it saves.
+    if (regs.pipeline.num_vertices < OCCLUSION_MIN_VERTICES) {
+        return false;
+    }
+    // Depth/stencil-only draws have side effects that an occlusion query cannot skip.
+    if (pipeline_info.state.blending.color_write_mask == 0) {
+        return false;
+    }
+    if (pipeline_info.state.depth_stencil.stencil_test_enable.Value() != 0) {
+        return false;
+    }
+    if (!framebuffer->color_id) {
+        return false;
+    }
+    return true;
+}
+
+u64 RasterizerVulkan::MakeOcclusionKey(const Framebuffer* framebuffer, bool is_indexed,
+                                       Common::Rectangle<u32> draw_rect) const {
+    const u64 base = regs.pipeline.vertex_attributes.GetPhysicalBaseAddress();
+    u64 key = base ^ (static_cast<u64>(regs.pipeline.num_vertices) * 0x9E3779B97F4A7C15ULL);
+    key ^= static_cast<u64>(framebuffer->color_id.index) << 32;
+    key ^= static_cast<u64>(regs.framebuffer.framebuffer.GetColorBufferPhysicalAddress()) *
+           0xD6E8FEB86659FD93ULL;
+    key ^= static_cast<u64>(regs.pipeline.vertex_offset) * 0xBF58476D1CE4E5B9ULL;
+    if (is_indexed) {
+        key ^= static_cast<u64>(regs.pipeline.index_array.offset) << 17;
+    }
+    // The same mesh can be drawn through different viewports or scissors. Keep those
+    // out of each other's visibility results.
+    const auto viewport = regs.rasterizer.GetViewportRect();
+    key ^= (static_cast<u64>(draw_rect.left) << 8) ^
+           (static_cast<u64>(draw_rect.bottom) << 24) ^
+           (static_cast<u64>(draw_rect.GetWidth()) << 40) ^
+           (static_cast<u64>(draw_rect.GetHeight()) << 48);
+    key ^= (static_cast<u64>(viewport.left) << 4) ^ (static_cast<u64>(viewport.top) << 20) ^
+           (static_cast<u64>(viewport.right) << 36) ^
+           (static_cast<u64>(viewport.bottom) << 52);
+    return key;
+}
+
+bool RasterizerVulkan::OcclusionShouldSkip(u64 key) {
+    OcclusionMesh& mesh = occlusion_meshes[key];
+    if (mesh.seen_frame == occlusion_frame) {
+        // The same mesh is drawn more than once this frame (coins, enemies, blocks...).
+        // Hiding it would hide every instance, so stop culling it entirely.
+        mesh.shared = true;
+    }
+    mesh.seen_frame = occlusion_frame;
+    if (mesh.shared || mesh.pending) {
+        return false;
+    }
+    return occlusion_frame < mesh.hidden_until;
+}
+
+u32 RasterizerVulkan::AcquireOcclusionQuery(u64 key) {
+    if (!occlusion_pool_ready || occlusion_cursor >= occlusion_pool_size) {
+        return INVALID_OCCLUSION_QUERY;
+    }
+    OcclusionMesh& mesh = occlusion_meshes[key];
+    if (mesh.shared || mesh.pending || occlusion_frame < mesh.hidden_until) {
+        return INVALID_OCCLUSION_QUERY;
+    }
+    mesh.query = occlusion_cursor++;
+    mesh.pending = true;
+    return mesh.query;
+}
+
+void RasterizerVulkan::UpdateOcclusion() {
+    ++occlusion_frame;
+
+    // Keep the per-mesh cache bounded on long sessions.
+    if (occlusion_meshes.size() > OCCLUSION_MAX_MESHES) {
+        for (auto it = occlusion_meshes.begin(); it != occlusion_meshes.end();) {
+            const OcclusionMesh& mesh = it->second;
+            if (!mesh.pending && mesh.seen_frame + 120 < occlusion_frame) {
+                it = occlusion_meshes.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    const bool enabled = Settings::values.enable_performance_hacks.GetValue() &&
+                         Settings::values.unsafe_cull_occluded_draws.GetValue();
+
+    bool all_resolved = true;
+    for (auto& entry : occlusion_meshes) {
+        OcclusionMesh& mesh = entry.second;
+        if (!mesh.pending) {
+            continue;
+        }
+        u64 result = 0;
+        const vk::Result status = instance.GetDevice().getQueryPoolResults(
+            *occlusion_pool, mesh.query, 1, sizeof(result), &result, sizeof(result),
+            vk::QueryResultFlagBits::e64);
+        if (status == vk::Result::eSuccess) {
+            mesh.pending = false;
+            if (result == 0 && !mesh.shared) {
+                mesh.hidden_until = occlusion_frame + OCCLUSION_HIDDEN_FRAMES;
+            }
+        } else {
+            // eNotReady is normal while the GPU is still behind. Any other error is
+            // treated as unresolved too, so the pool is never reset while it may
+            // still be in use and culling simply stays off.
+            all_resolved = false;
+        }
+    }
+
+    if (!all_resolved) {
+        occlusion_pool_ready = false;
+        return;
+    }
+
+    if (!enabled) {
+        occlusion_pool_ready = false;
+        return;
+    }
+
+    // Nothing used the pool this frame and it is already clean.
+    if (occlusion_cursor == 0 && occlusion_pool_ready) {
+        return;
+    }
+
+    // Every recorded query has been consumed, so the whole pool can be reset for
+    // the next frame. This is recorded outside any render pass, before the next
+    // frame's draws are submitted.
+    renderpass_cache.EndRendering();
+    const vk::QueryPool pool = *occlusion_pool;
+    const u32 count = occlusion_pool_size;
+    scheduler.Record(
+        [pool, count](vk::CommandBuffer cmdbuf) { cmdbuf.resetQueryPool(pool, 0, count); });
+    occlusion_cursor = 0;
+    occlusion_pool_ready = true;
+}
+
 void RasterizerVulkan::DrawTriangles() {
     if (vertex_batch.empty()) {
         return;
@@ -547,6 +749,13 @@ bool RasterizerVulkan::Draw(bool accelerate, bool is_indexed) {
 
     const bool shadow_rendering = regs.framebuffer.IsShadowRendering();
     const bool has_stencil = regs.framebuffer.HasStencil();
+
+    // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes.
+    if (shadow_rendering && Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
+        vertex_batch.clear();
+        return true;
+    }
 
     const bool write_color_fb = shadow_rendering || pipeline_info.GetFinalColorWriteMask(instance);
     const bool write_depth_fb = pipeline_info.IsDepthWriteEnabled();
@@ -570,6 +779,19 @@ bool RasterizerVulkan::Draw(bool accelerate, bool is_indexed) {
 
     pipeline_info.state.attachments.color = framebuffer->Format(SurfaceType::Color);
     pipeline_info.state.attachments.depth = framebuffer->Format(SurfaceType::Depth);
+
+    // AGY SPEED OPTIMIZATION: Skip heavy meshes that an occlusion query found
+    // fully hidden in a recent frame.
+    u64 occlusion_key = 0;
+    const bool occlusion_eligible =
+        accelerate && write_color_fb && OcclusionEligible(framebuffer);
+    if (occlusion_eligible) {
+        occlusion_key = MakeOcclusionKey(framebuffer, is_indexed, draw_rect);
+        if (OcclusionShouldSkip(occlusion_key)) {
+            vertex_batch.clear();
+            return true;
+        }
+    }
 
     // Update scissor uniforms
     const auto [scissor_x1, scissor_y2, scissor_x2, scissor_y1] = fb_helper.Scissor();
@@ -611,7 +833,7 @@ bool RasterizerVulkan::Draw(bool accelerate, bool is_indexed) {
     // Draw the vertex batch
     bool succeeded = true;
     if (accelerate) {
-        succeeded = AccelerateDrawBatchInternal(is_indexed);
+        succeeded = AccelerateDrawBatchInternal(is_indexed, occlusion_key, occlusion_eligible);
     } else {
         pipeline_cache.BindPipeline(pipeline_info, true);
 

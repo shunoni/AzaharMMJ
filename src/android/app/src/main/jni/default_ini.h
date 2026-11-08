@@ -644,6 +644,49 @@ static const char* android_config_default_file_content = (BOOST_HANA_STRING(R"(
 # 0 (default): Off, 1: On
 )") DECLARE_KEY(unsafe_skip_page_marking) BOOST_HANA_STRING(R"(
 
+# [Vulkan only] Skip heavy draws that were fully hidden behind other geometry in
+# recent frames. Big speedup in 3D scenes, but objects can pop in at screen edges
+# and some effects may flicker.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_cull_occluded_draws) BOOST_HANA_STRING(R"(
+
+# Skip the game's shadow-map rendering passes entirely. Faster, but shadows and
+# some lighting effects will be missing or stale.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_skip_shadow_rendering) BOOST_HANA_STRING(R"(
+
+# Force stencil testing and writes off. Faster on games that use stencil heavily,
+# but outlines, shadow volumes and some effects will render incorrectly.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_disable_stencil_test) BOOST_HANA_STRING(R"(
+
+# Render every draw opaque. Can massively reduce fill cost in transparent-heavy
+# scenes, but transparency, UI and particle effects will look broken.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_disable_alpha_blend) BOOST_HANA_STRING(R"(
+
+# Skip GPU texture-to-texture copies. Faster, but render-to-texture effects,
+# reflections and some screen effects will be stale or wrong.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_skip_texture_copies) BOOST_HANA_STRING(R"(
+
+# [OpenGL only] Skip invalidating streaming buffers when they wrap, avoiding a
+# driver synchronization point. Can corrupt geometry or cause flickering.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(gl_unsafe_stream_buffer) BOOST_HANA_STRING(R"(
+
+# Skip texture copies whose source surface cannot be resolved instead of falling
+# back. This is Citra MMJ's safe per-game texture-copy hack (used for Mario Kart 7).
+# Applies to OpenGL and Vulkan.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_skip_unresolved_texture_copies) BOOST_HANA_STRING(R"(
+
+# Keep GPU textures when the CPU writes to the same memory instead of flushing and
+# removing them. Big speedup for texture-streaming games, but textures can go stale.
+# Applies to OpenGL and Vulkan.
+# 0 (default): Off, 1: On
+)") DECLARE_KEY(unsafe_trust_cached_textures) BOOST_HANA_STRING(R"(
+
 # Delay the start of apps when LLE modules are enabled
 # 0: Off, 1 (default): On
 )") DECLARE_KEY(delay_start_for_lle_modules) BOOST_HANA_STRING(R"(

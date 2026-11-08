@@ -186,6 +186,13 @@ bool RasterizerCache<T>::AccelerateTextureCopy(const Pica::DisplayTransferConfig
     const DebugScope scope{runtime, Common::Vec4f{0.f, 0.f, 1.f, 1.f},
                            "RasterizerCache::AccelerateTextureCopy ({})", config.DebugName()};
 
+    // AGY SPEED OPTIMIZATION: Skip GPU texture-to-texture copies entirely.
+    // Render-to-texture effects reuse stale contents but the emulator keeps going.
+    if (Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::values.unsafe_skip_texture_copies.GetValue()) {
+        return true;
+    }
+
     // Texture copy size is aligned to 16 byte units
     const u32 copy_size = Common::AlignDown(config.texture_copy.size, 16);
     if (copy_size == 0) {
@@ -228,7 +235,11 @@ bool RasterizerCache<T>::AccelerateTextureCopy(const Pica::DisplayTransferConfig
 
     const auto [src_surface_id, src_rect] = GetTexCopySurface(src_params);
     if (!src_surface_id) {
-        return false;
+        // AGY SPEED OPTIMIZATION (Citra MMJ skip_texture_copy): the source surface
+        // cannot be resolved, so skip the copy instead of falling back to a slow
+        // path. This is the safer per-game variant used for Mario Kart 7.
+        return Settings::values.enable_performance_hacks.GetValue() &&
+               Settings::values.unsafe_skip_unresolved_texture_copies.GetValue();
     }
 
     const SurfaceParams src_info = slot_surfaces[src_surface_id];
@@ -1351,6 +1362,13 @@ void RasterizerCache<T>::InvalidateRegion(PAddr addr, u32 size, SurfaceId region
         // If the CPU is invalidating this region we want to remove it
         // to (likely) mark the memory pages as uncached
         if (!region_owner_id && size <= 8) {
+            // AGY SPEED OPTIMIZATION (Citra MMJ skip_cpu_write): keep the cached GPU
+            // texture even when the CPU writes this memory instead of flushing and
+            // removing it. Textures can go stale, but streaming games get much faster.
+            if (Settings::values.enable_performance_hacks.GetValue() &&
+                Settings::values.unsafe_trust_cached_textures.GetValue()) {
+                return;
+            }
             if (Settings::values.mii_compatibility_fixes.GetValue() ||
                 !Settings::values.enable_performance_hacks.GetValue() ||
                 !Settings::values.fast_texture_invalidation.GetValue()) {

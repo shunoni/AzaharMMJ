@@ -531,6 +531,24 @@ void QtConfig::ReadDebuggingValues() {
     ReadBasicSetting(Settings::values.toggle_unique_data_console_type);
     ReadBasicSetting(Settings::values.enable_exception_handler);
     ReadBasicSetting(Settings::values.prevent_frame_limiter_catch_up);
+    ReadBasicSetting(Settings::values.enable_performance_hacks);
+    ReadBasicSetting(Settings::values.unsafe_cpu_optimizations);
+    ReadBasicSetting(Settings::values.skip_slow_draw_fallback);
+    ReadBasicSetting(Settings::values.fast_texture_invalidation);
+    ReadBasicSetting(Settings::values.fast_shader_precision);
+    ReadBasicSetting(Settings::values.unsafe_skip_texture_flush);
+    ReadBasicSetting(Settings::values.unsafe_skip_gpu_sync);
+    ReadBasicSetting(Settings::values.unsafe_skip_mipmaps);
+    ReadBasicSetting(Settings::values.unsafe_fast_shader_math);
+    ReadBasicSetting(Settings::values.unsafe_skip_page_marking);
+    ReadBasicSetting(Settings::values.unsafe_cull_occluded_draws);
+    ReadBasicSetting(Settings::values.unsafe_skip_shadow_rendering);
+    ReadBasicSetting(Settings::values.unsafe_disable_stencil_test);
+    ReadBasicSetting(Settings::values.unsafe_disable_alpha_blend);
+    ReadBasicSetting(Settings::values.unsafe_skip_texture_copies);
+    ReadBasicSetting(Settings::values.gl_unsafe_stream_buffer);
+    ReadBasicSetting(Settings::values.unsafe_skip_unresolved_texture_copies);
+    ReadBasicSetting(Settings::values.unsafe_trust_cached_textures);
 
     qt_config->beginGroup(QStringLiteral("LLE"));
     for (const auto& service_module : Service::service_module_map) {
@@ -1124,6 +1142,24 @@ void QtConfig::SaveDebuggingValues() {
     WriteBasicSetting(Settings::values.toggle_unique_data_console_type);
     WriteBasicSetting(Settings::values.enable_exception_handler);
     WriteBasicSetting(Settings::values.prevent_frame_limiter_catch_up);
+    WriteBasicSetting(Settings::values.enable_performance_hacks);
+    WriteBasicSetting(Settings::values.unsafe_cpu_optimizations);
+    WriteBasicSetting(Settings::values.skip_slow_draw_fallback);
+    WriteBasicSetting(Settings::values.fast_texture_invalidation);
+    WriteBasicSetting(Settings::values.fast_shader_precision);
+    WriteBasicSetting(Settings::values.unsafe_skip_texture_flush);
+    WriteBasicSetting(Settings::values.unsafe_skip_gpu_sync);
+    WriteBasicSetting(Settings::values.unsafe_skip_mipmaps);
+    WriteBasicSetting(Settings::values.unsafe_fast_shader_math);
+    WriteBasicSetting(Settings::values.unsafe_skip_page_marking);
+    WriteBasicSetting(Settings::values.unsafe_cull_occluded_draws);
+    WriteBasicSetting(Settings::values.unsafe_skip_shadow_rendering);
+    WriteBasicSetting(Settings::values.unsafe_disable_stencil_test);
+    WriteBasicSetting(Settings::values.unsafe_disable_alpha_blend);
+    WriteBasicSetting(Settings::values.unsafe_skip_texture_copies);
+    WriteBasicSetting(Settings::values.gl_unsafe_stream_buffer);
+    WriteBasicSetting(Settings::values.unsafe_skip_unresolved_texture_copies);
+    WriteBasicSetting(Settings::values.unsafe_trust_cached_textures);
 
     qt_config->beginGroup(QStringLiteral("LLE"));
     for (const auto& service_module : Settings::values.lle_modules) {

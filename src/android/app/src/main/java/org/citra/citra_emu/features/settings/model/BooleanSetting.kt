@@ -74,6 +74,46 @@ enum class BooleanSetting(
         Settings.SECTION_DEBUG,
         false
     ),
+    UNSAFE_CULL_OCCLUDED_DRAWS(
+        SettingKeys.unsafe_cull_occluded_draws(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_SKIP_SHADOW_RENDERING(
+        SettingKeys.unsafe_skip_shadow_rendering(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_DISABLE_STENCIL_TEST(
+        SettingKeys.unsafe_disable_stencil_test(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_DISABLE_ALPHA_BLEND(
+        SettingKeys.unsafe_disable_alpha_blend(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_SKIP_TEXTURE_COPIES(
+        SettingKeys.unsafe_skip_texture_copies(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    GL_UNSAFE_STREAM_BUFFER(
+        SettingKeys.gl_unsafe_stream_buffer(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_SKIP_UNRESOLVED_TEXTURE_COPIES(
+        SettingKeys.unsafe_skip_unresolved_texture_copies(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
+    UNSAFE_TRUST_CACHED_TEXTURES(
+        SettingKeys.unsafe_trust_cached_textures(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
     MII_COMPATIBILITY_FIXES(SettingKeys.mii_compatibility_fixes(), Settings.SECTION_DEBUG, false),
     USE_PER_GAME_SETTINGS(SettingKeys.use_per_game_settings(), Settings.SECTION_DEBUG, false),
     ENABLE_RPC_SERVER(SettingKeys.enable_rpc_server(), Settings.SECTION_DEBUG, false),

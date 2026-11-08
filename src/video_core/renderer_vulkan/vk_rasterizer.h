@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "video_core/rasterizer_accelerated.h"
 #include "video_core/renderer_vulkan/vk_descriptor_update_queue.h"
 #include "video_core/renderer_vulkan/vk_pipeline_cache.h"
@@ -93,7 +95,15 @@ private:
     bool Draw(bool accelerate, bool is_indexed);
 
     /// Internal implementation for AccelerateDrawBatch
-    bool AccelerateDrawBatchInternal(bool is_indexed);
+    bool AccelerateDrawBatchInternal(bool is_indexed, u64 occlusion_key, bool occlusion_eligible);
+
+    /// Occlusion culling speed hack helpers
+    bool OcclusionEligible(const Framebuffer* framebuffer) const;
+    u64 MakeOcclusionKey(const Framebuffer* framebuffer, bool is_indexed,
+                         Common::Rectangle<u32> draw_rect) const;
+    bool OcclusionShouldSkip(u64 key);
+    u32 AcquireOcclusionQuery(u64 key);
+    void UpdateOcclusion();
 
     /// Setup index array for AccelerateDrawBatch
     void SetupIndexArray();
@@ -141,6 +151,21 @@ private:
     u32 uniform_size_aligned_vs;
     u32 uniform_size_aligned_fs;
     bool async_shaders{false};
+
+    struct OcclusionMesh {
+        u64 hidden_until{};
+        u64 seen_frame{};
+        bool shared{};
+        bool pending{};
+        u32 query{};
+    };
+
+    vk::UniqueQueryPool occlusion_pool;
+    std::unordered_map<u64, OcclusionMesh> occlusion_meshes;
+    u64 occlusion_frame{};
+    u32 occlusion_cursor{};
+    u32 occlusion_pool_size{};
+    bool occlusion_pool_ready{};
 };
 
 } // namespace Vulkan

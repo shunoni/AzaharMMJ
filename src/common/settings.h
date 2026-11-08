@@ -671,6 +671,15 @@ struct Values {
     Setting<bool> unsafe_skip_mipmaps{false, Keys::unsafe_skip_mipmaps};
     Setting<bool> unsafe_fast_shader_math{false, Keys::unsafe_fast_shader_math};
     Setting<bool> unsafe_skip_page_marking{false, Keys::unsafe_skip_page_marking};
+    Setting<bool> unsafe_cull_occluded_draws{false, Keys::unsafe_cull_occluded_draws};
+    Setting<bool> unsafe_skip_shadow_rendering{false, Keys::unsafe_skip_shadow_rendering};
+    Setting<bool> unsafe_disable_stencil_test{false, Keys::unsafe_disable_stencil_test};
+    Setting<bool> unsafe_disable_alpha_blend{false, Keys::unsafe_disable_alpha_blend};
+    Setting<bool> unsafe_skip_texture_copies{false, Keys::unsafe_skip_texture_copies};
+    Setting<bool> gl_unsafe_stream_buffer{false, Keys::gl_unsafe_stream_buffer};
+    Setting<bool> unsafe_skip_unresolved_texture_copies{
+        false, Keys::unsafe_skip_unresolved_texture_copies};
+    Setting<bool> unsafe_trust_cached_textures{false, Keys::unsafe_trust_cached_textures};
 
     // WebService
     Setting<std::string> web_api_url{"http://88.198.47.46:5000", Keys::web_api_url};

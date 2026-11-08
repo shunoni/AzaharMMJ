@@ -258,6 +258,8 @@ void RasterizerOpenGL::SwitchDiskResources(u64 title_id) {
 void RasterizerOpenGL::SyncDrawState() {
     SyncDrawUniforms();
 
+    const bool perf_hacks = Settings::values.enable_performance_hacks.GetValue();
+
     // SyncClipEnabled();
     state.clip_distance[1] = regs.rasterizer.clip_enable != 0;
     // SyncCullMode();
@@ -272,7 +274,10 @@ void RasterizerOpenGL::SyncDrawState() {
     const bool is_flipped = regs.framebuffer.framebuffer.IsFlipped();
     state.cull.mode = is_flipped && state.cull.enabled ? GL_FRONT : GL_BACK;
     // SyncBlendEnabled();
-    state.blend.enabled = (regs.framebuffer.output_merger.alphablend_enable == 1);
+    // AGY SPEED OPTIMIZATION: force every draw opaque.
+    state.blend.enabled =
+        (regs.framebuffer.output_merger.alphablend_enable == 1) &&
+        !(perf_hacks && Settings::values.unsafe_disable_alpha_blend.GetValue());
     // SyncBlendFuncs();
     const bool has_minmax_factor = driver.HasBlendMinMaxFactor();
     state.blend.rgb_equation = PicaToGL::BlendEquation(
@@ -333,9 +338,11 @@ void RasterizerOpenGL::SyncDrawState() {
             is_color_write_enabled(regs.framebuffer.output_merger.alpha_enable);
     }
     // SyncStencilTest();
+    // AGY SPEED OPTIMIZATION: force stencil testing and writes off.
     state.stencil.test_enabled =
         regs.framebuffer.output_merger.stencil_test.enable &&
-        regs.framebuffer.framebuffer.depth_format == Pica::FramebufferRegs::DepthFormat::D24S8;
+        regs.framebuffer.framebuffer.depth_format == Pica::FramebufferRegs::DepthFormat::D24S8 &&
+        !(perf_hacks && Settings::values.unsafe_disable_stencil_test.GetValue());
     state.stencil.test_func =
         PicaToGL::CompareFunc(regs.framebuffer.output_merger.stencil_test.func);
     state.stencil.test_ref = regs.framebuffer.output_merger.stencil_test.reference_value;
@@ -468,6 +475,13 @@ bool RasterizerOpenGL::SetupGeometryShader() {
 }
 
 bool RasterizerOpenGL::AccelerateDrawBatch(bool is_indexed) {
+    // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes before
+    // any vertex analysis or upload work is done.
+    if (regs.framebuffer.IsShadowRendering() &&
+        Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
+        return true;
+    }
     if (regs.pipeline.use_gs != Pica::PipelineRegs::UseGS::No) {
         if (regs.pipeline.gs_config.mode != Pica::PipelineRegs::GSMode::Point) {
             return false;
@@ -559,6 +573,13 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
 
     const bool shadow_rendering = regs.framebuffer.IsShadowRendering();
     const bool has_stencil = regs.framebuffer.HasStencil();
+
+    // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes.
+    if (shadow_rendering && Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
+        vertex_batch.clear();
+        return true;
+    }
 
     const bool write_color_fb = shadow_rendering || state.color_mask.red_enabled == GL_TRUE ||
                                 state.color_mask.green_enabled == GL_TRUE ||
