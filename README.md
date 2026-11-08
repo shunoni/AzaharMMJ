@@ -1,4 +1,4 @@
-DOWNLOAD ALL BUILDS FROM THE ACTIONS TAB!!! The main branch will be updated to match the rgds-speed-optimizations branch every once in a while once the new features are tested and confirmed to work.
+DOWNLOAD ALL BUILDS FROM THE ACTIONS TAB!!! If you have issues with it, you can also download from the releases page, just I don't update it as often because the releases tab is only for tested builds that I know work perfectly. The main branch will be updated to match the rgds-speed-optimizations branch every once in a while once the new features are tested and confirmed to work.
 
 Feel free to contribute (:
 
