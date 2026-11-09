@@ -10,17 +10,17 @@ Why did I do this? No idea.
 
 Here are the stats on my Anbernic RGDS (Base model, Android, Stock OS) :
 
-| Game tested  | Game speed | Frameskip mode | New 3DS Mode | Additional notes |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
-| Tomodachi life  | 100% locked  | Mode 1  | No | None |
-| Streetpass Mii Plaza  | 100% average  | Mode 1  | No | Updating does not work, play coins unobtainable. Not a bug |
-| 3DS HOME menu | Almost 100%, working on it | Mode 1 | No | Small stutters when first booted, fine after that |
-| Mario Kart 7 | 95-100% average | Mode 1 | No | This is one of the main games I wanted to play, so I'm still optimizing it to hit 100% locked. |
-| Minicraft 3D (Game of Tobi) | 100% locked on average settings | Mode 1 | No | This is an unofficial port made for the original 3DS. |
-| Minecraft (Official port) | 60-70% average, unlikely to ever reach 100% | Mode 2 | Yes | I seriously doubt we'll ever reach full speed on this one. |
-| Geometry Dash 3DS (AleFunky) | 100% locked | Mode 0/None | No | *Clutterfunk intensifies* |
-| Mario 3D Land | 75-85% average | Mode 1 | No | None |
-| Mii Maker | 100% locked | Mode 1 | No | None |
+| Game tested  | Game speed | Frameskip mode | New 3DS Mode | Realtime GPU | Additional notes |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| Tomodachi life  | 100% locked  | Mode 1  | No | Optional | None |
+| Streetpass Mii Plaza  | 100% average  | Mode 1  | No | Optional | Updating does not work, play coins unobtainable. Not a bug |
+| 3DS HOME menu | Almost 100%, working on it | Mode 1 | No | Optional | Small stutters when first booted, fine after that |
+| Mario Kart 7 | 95-100% average | Mode 1 | No | Recommended | This is one of the main games I wanted to play, so I'm still optimizing it to hit 100% locked. |
+| Minicraft 3D (Game of Tobi) | 100% locked on average settings | Mode 1 | No | Optional | This is an unofficial port made for the original 3DS. |
+| Minecraft (Official port) | 90-100% average, unlikely to ever reach 100% without real-time GPU and even then it runs awfully in terms of fps | Mode 2 | Yes | Needed | I seriously doubt we'll ever reach full speed on this one. |
+| Geometry Dash 3DS (AleFunky) | 100% locked | Mode 0/None | No | Optional | *Clutterfunk intensifies* |
+| Mario 3D Land | 75-85% average | Mode 1 | No | Needed | None |
+| Mii Maker | 100% locked | Mode 1 | No | Optional | None |
 
 And here's the performance side by side, also on my RGDS, with all ~~11~~ 10 special ~~herbs and spices~~ hacks and optimizations enabled (holy KFC reference) :
 
