@@ -101,12 +101,8 @@ class Settings {
             if (updatedSection != null) {
                 for (setting in updatedSection.settings.values) {
                     // Global-only device settings are ignored in per-game files, so do not
-                    // let stale copies shadow the global values in the UI either. Older
-                    // builds saved hacks only in the per-game file, so keep the per-game
-                    // value until the global config actually defines it.
-                    if (setting.key in GLOBAL_ONLY_DEBUG_KEYS &&
-                        hasExplicitGlobalDebugValue(setting.key)
-                    ) {
+                    // let stale copies shadow the global values in the UI either.
+                    if (setting.key in GLOBAL_ONLY_DEBUG_KEYS) {
                         continue
                     }
                     filteredSection.putSetting(setting)
@@ -123,14 +119,6 @@ class Settings {
             }
         }
     }
-
-    /**
-     * True when the global config explicitly defines this debug setting. The generated
-     * default config only contains empty placeholders, which the INI reader skips, so a
-     * missing entry means the value is still unset and an old per-game value may be kept.
-     */
-    private fun hasExplicitGlobalDebugValue(key: String?): Boolean =
-        key != null && sections[SECTION_DEBUG]?.getSetting(key) != null
 
     fun loadSettings(gameId: String, view: SettingsActivityView) {
         this.gameId = gameId
@@ -240,7 +228,6 @@ class Settings {
             BooleanSetting.UNSAFE_SKIP_MIPMAPS.key,
             BooleanSetting.UNSAFE_FAST_SHADER_MATH.key,
             BooleanSetting.UNSAFE_SKIP_PAGE_MARKING.key,
-            BooleanSetting.UNSAFE_CULL_OCCLUDED_DRAWS.key,
             BooleanSetting.UNSAFE_SKIP_SHADOW_RENDERING.key,
             BooleanSetting.UNSAFE_DISABLE_STENCIL_TEST.key,
             BooleanSetting.UNSAFE_DISABLE_ALPHA_BLEND.key,

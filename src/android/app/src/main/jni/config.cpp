@@ -70,7 +70,6 @@ constexpr std::array global_only_debug_keys{
     std::string_view{"unsafe_skip_mipmaps"},
     std::string_view{"unsafe_fast_shader_math"},
     std::string_view{"unsafe_skip_page_marking"},
-    std::string_view{"unsafe_cull_occluded_draws"},
     std::string_view{"unsafe_skip_shadow_rendering"},
     std::string_view{"unsafe_disable_stencil_test"},
     std::string_view{"unsafe_disable_alpha_blend"},
@@ -114,15 +113,7 @@ void AddIniBuffer(std::string_view buffer,
         std::string value = TrimIniWhitespace(line.substr(equals + 1));
         if (!key.empty()) {
             if (skip_global_only_keys && IsGlobalOnlyDebugKey(section, key)) {
-                // Older builds stored the performance hacks only in the per-game INI.
-                // Ignore the per-game copy only when the global config actually sets the
-                // key; otherwise upgrading would silently turn every hack off.
-                const auto existing =
-                    values.find({NormalizeIniName(section), NormalizeIniName(key)});
-                if (existing != values.end() &&
-                    !TrimIniWhitespace(existing->second.value).empty()) {
-                    continue;
-                }
+                continue;
             }
             values[{NormalizeIniName(section), NormalizeIniName(key)}] =
                 IniValue{section, std::move(key), std::move(value)};
@@ -460,7 +451,6 @@ void Config::ReadValues() {
     ReadSetting("Debugging", Settings::values.unsafe_skip_mipmaps);
     ReadSetting("Debugging", Settings::values.unsafe_fast_shader_math);
     ReadSetting("Debugging", Settings::values.unsafe_skip_page_marking);
-    ReadSetting("Debugging", Settings::values.unsafe_cull_occluded_draws);
     ReadSetting("Debugging", Settings::values.unsafe_skip_shadow_rendering);
     ReadSetting("Debugging", Settings::values.unsafe_disable_stencil_test);
     ReadSetting("Debugging", Settings::values.unsafe_disable_alpha_blend);

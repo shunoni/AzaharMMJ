@@ -2063,15 +2063,6 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     BooleanSetting.UNSAFE_SKIP_PAGE_MARKING.defaultValue
                 )
             )
-            add(
-                SwitchSetting(
-                    BooleanSetting.UNSAFE_CULL_OCCLUDED_DRAWS,
-                    R.string.unsafe_cull_occluded_draws,
-                    R.string.unsafe_cull_occluded_draws_description,
-                    BooleanSetting.UNSAFE_CULL_OCCLUDED_DRAWS.key,
-                    BooleanSetting.UNSAFE_CULL_OCCLUDED_DRAWS.defaultValue
-                )
-            )
             add(HeaderSetting(R.string.hacks_extreme, R.string.hacks_extreme_description))
             add(
                 SwitchSetting(

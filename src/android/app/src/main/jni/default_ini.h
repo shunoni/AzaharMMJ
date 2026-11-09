@@ -646,12 +646,6 @@ static const char* android_config_default_file_content = (BOOST_HANA_STRING(R"(
 # 0 (default): Off, 1: On
 )") DECLARE_KEY(unsafe_skip_page_marking) BOOST_HANA_STRING(R"(
 
-# [Vulkan only] Skip heavy draws that were fully hidden behind other geometry in
-# recent frames. Big speedup in 3D scenes, but objects can pop in at screen edges
-# and some effects may flicker.
-# 0 (default): Off, 1: On
-)") DECLARE_KEY(unsafe_cull_occluded_draws) BOOST_HANA_STRING(R"(
-
 # Skip the game's shadow-map rendering passes entirely. Faster, but shadows and
 # some lighting effects will be missing or stale.
 # 0 (default): Off, 1: On

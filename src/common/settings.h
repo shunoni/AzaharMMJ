@@ -671,7 +671,6 @@ struct Values {
     Setting<bool> unsafe_skip_mipmaps{false, Keys::unsafe_skip_mipmaps};
     Setting<bool> unsafe_fast_shader_math{false, Keys::unsafe_fast_shader_math};
     Setting<bool> unsafe_skip_page_marking{false, Keys::unsafe_skip_page_marking};
-    Setting<bool> unsafe_cull_occluded_draws{false, Keys::unsafe_cull_occluded_draws};
     Setting<bool> unsafe_skip_shadow_rendering{false, Keys::unsafe_skip_shadow_rendering};
     Setting<bool> unsafe_disable_stencil_test{false, Keys::unsafe_disable_stencil_test};
     Setting<bool> unsafe_disable_alpha_blend{false, Keys::unsafe_disable_alpha_blend};
@@ -714,11 +713,12 @@ void LogSettings();
 // Hash of the settings that affect generated shader source. Used to invalidate shader caches.
 u64 GetShaderCacheSettingsHash();
 
-// Whether the accuracy-breaking performance hacks may be applied. This only tracks the
-// master switch; the few hacks that conflict with the Mii compatibility fixes check that
-// setting directly instead. Kept inline because it is queried from hot draw/cache paths.
+// Whether the accuracy-breaking performance hacks may be applied. Enabling the Mii
+// compatibility fixes forces the accuracy-first paths so the face fix also works while
+// the performance hacks are otherwise on.
 inline bool PerformanceHacksActive() {
-    return values.enable_performance_hacks.GetValue();
+    return values.enable_performance_hacks.GetValue() &&
+           !values.mii_compatibility_fixes.GetValue();
 }
 
 // Restore the global state of all applicable settings in the Values struct

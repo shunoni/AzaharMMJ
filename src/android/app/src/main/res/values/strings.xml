@@ -433,8 +433,6 @@
     <string name="unsafe_fast_shader_math_description">Uses approximate reciprocal and square root instructions and skips NaN sanitization in the ARM64 shader JIT. Much faster on weak CPUs, but shader results can be inaccurate. Restart Azahar after changing this setting.</string>
     <string name="unsafe_skip_page_marking">Unsafe Skip Page Marking</string>
     <string name="unsafe_skip_page_marking_description">Skips marking pages as rasterizer-cached to avoid page table overhead. CPU and GPU memory are no longer fully coherent, which can cause stale textures. Restart Azahar after changing this setting.</string>
-    <string name="unsafe_cull_occluded_draws">Unsafe Vulkan Occlusion Culling</string>
-    <string name="unsafe_cull_occluded_draws_description">Vulkan only. Skips heavy draws that were fully hidden behind other geometry in recent frames. Big speedup in 3D scenes, but objects can pop in at screen edges and some effects may flicker. Requires the Vulkan renderer.</string>
     <string name="unsafe_skip_shadow_rendering">Unsafe Skip Shadow Rendering</string>
     <string name="unsafe_skip_shadow_rendering_description">Skips the game\'s shadow-map rendering passes entirely. Faster, but shadows and some lighting effects will be missing or stale.</string>
     <string name="unsafe_disable_stencil_test">Unsafe Disable Stencil Test</string>
