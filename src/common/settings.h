@@ -660,7 +660,6 @@ struct Values {
     Setting<bool> enable_exception_handler{false, Keys::enable_exception_handler};
     Setting<bool> mii_compatibility_fixes{false, Keys::mii_compatibility_fixes};
     Setting<bool> use_per_game_settings{false, Keys::use_per_game_settings};
-    Setting<bool> prevent_frame_limiter_catch_up{false, Keys::prevent_frame_limiter_catch_up};
     Setting<bool> realtime_gpu{false, Keys::realtime_gpu};
     Setting<bool> enable_performance_hacks{false, Keys::enable_performance_hacks};
     Setting<bool> unsafe_cpu_optimizations{false, Keys::unsafe_cpu_optimizations};
@@ -715,10 +714,12 @@ void LogSettings();
 // Hash of the settings that affect generated shader source. Used to invalidate shader caches.
 u64 GetShaderCacheSettingsHash();
 
-// Whether the accuracy-breaking performance hacks may be applied. Enabling the Mii
-// compatibility fixes forces the accuracy-first paths so the face fix also works while
-// the performance hacks are otherwise on.
-bool PerformanceHacksActive();
+// Whether the accuracy-breaking performance hacks may be applied. This only tracks the
+// master switch; the few hacks that conflict with the Mii compatibility fixes check that
+// setting directly instead. Kept inline because it is queried from hot draw/cache paths.
+inline bool PerformanceHacksActive() {
+    return values.enable_performance_hacks.GetValue();
+}
 
 // Restore the global state of all applicable settings in the Values struct
 void RestoreGlobalState(bool is_powered_on);

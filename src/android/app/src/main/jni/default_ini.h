@@ -593,10 +593,6 @@ static const char* android_config_default_file_content = (BOOST_HANA_STRING(R"(
 # 0 (default): Off, 1: On
 )") DECLARE_KEY(use_per_game_settings) BOOST_HANA_STRING(R"(
 
-# Prevent frame limiter catch-up after slow frames
-# 0 (default): Off, 1: On
-)") DECLARE_KEY(prevent_frame_limiter_catch_up) BOOST_HANA_STRING(R"(
-
 # Keep guest time running at full speed when the host GPU cannot keep up by skipping
 # drawing work instead of slowing the whole emulator down. Requires performance hacks.
 # Expected visuals can be stale and framebuffer readback effects may glitch.

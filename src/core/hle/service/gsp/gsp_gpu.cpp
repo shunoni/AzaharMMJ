@@ -491,7 +491,11 @@ void GSP_GPU::SignalInterruptForThread(InterruptId interrupt_id, u32 thread_id, 
         perf_recorder.UpdateTime(interrupt_id, wait_delay_ns);
     }
 
-    if (Settings::values.simulate_3ds_gpu_timings.GetValue()) {
+    // Simulating 3DS GPU completion timings is an accuracy/stability feature that adds
+    // artificial delays. When the performance-hack master switch is on, speed wins.
+    const bool simulate_gpu_timings =
+        Settings::values.simulate_3ds_gpu_timings.GetValue() && !Settings::PerformanceHacksActive();
+    if (simulate_gpu_timings) {
 
         if (delay_texture_copy_completion) {
             wait_delay_ns += (interrupt_id == InterruptId::PPF)

@@ -531,7 +531,6 @@ void QtConfig::ReadDebuggingValues() {
     ReadBasicSetting(Settings::values.toggle_unique_data_console_type);
     ReadBasicSetting(Settings::values.enable_exception_handler);
     ReadBasicSetting(Settings::values.mii_compatibility_fixes);
-    ReadBasicSetting(Settings::values.prevent_frame_limiter_catch_up);
     ReadBasicSetting(Settings::values.realtime_gpu);
     ReadBasicSetting(Settings::values.enable_performance_hacks);
     ReadBasicSetting(Settings::values.unsafe_cpu_optimizations);
@@ -1144,7 +1143,6 @@ void QtConfig::SaveDebuggingValues() {
     WriteBasicSetting(Settings::values.toggle_unique_data_console_type);
     WriteBasicSetting(Settings::values.enable_exception_handler);
     WriteBasicSetting(Settings::values.mii_compatibility_fixes);
-    WriteBasicSetting(Settings::values.prevent_frame_limiter_catch_up);
     WriteBasicSetting(Settings::values.realtime_gpu);
     WriteBasicSetting(Settings::values.enable_performance_hacks);
     WriteBasicSetting(Settings::values.unsafe_cpu_optimizations);

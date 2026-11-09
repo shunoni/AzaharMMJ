@@ -331,26 +331,16 @@
        </widget>
       </item>
       <item row="6" column="0">
-       <widget class="QCheckBox" name="prevent_frame_limiter_catch_up">
-        <property name="toolTip">
-         <string>Do not let emulation run faster than the configured speed after a slow frame. When frames are consistently late, actual emulation speed may stay below the configured limit.</string>
-        </property>
-        <property name="text">
-         <string>Prevent frame limiter speed-up after slow frames</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
        <widget class="QCheckBox" name="mii_compatibility_fixes">
         <property name="toolTip">
-         <string>Restores full shader precision and texture synchronization to fix Mii face artifacts and editor crashes. Performance hacks are ignored while this is enabled. Restart Azahar after changing this setting.</string>
+         <string>Restores full shader precision and texture synchronization to fix Mii face artifacts and editor crashes. This overrides the shader precision and texture cache hacks while leaving the other performance hacks enabled. Restart Azahar after changing this setting.</string>
         </property>
         <property name="text">
          <string>Mii compatibility fixes (takes priority over performance hacks)</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
+      <item row="7" column="0">
        <widget class="QCheckBox" name="enable_performance_hacks">
         <property name="toolTip">
          <string>Master switch for the unsafe performance hacks. Disable this for accurate rendering (for example, to fix broken Mii faces or UI). Restart Azahar after changing this setting.</string>
@@ -360,7 +350,7 @@
         </property>
        </widget>
       </item>
-      <item row="9" column="0">
+      <item row="8" column="0">
        <widget class="QCheckBox" name="realtime_gpu">
         <property name="toolTip">
          <string>Keeps guest time running at full speed when the GPU cannot keep up by skipping drawing work instead of slowing the whole emulator down. The game can run at 100% speed at low FPS, but effects can be stale and games that read back the screen may glitch. Requires performance hacks.</string>
