@@ -16,6 +16,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Install git-archive-all
+        run: |
+          python3 -m venv "$RUNNER_TEMP/archive-venv"
+          "$RUNNER_TEMP/archive-venv/bin/pip" install git-archive-all
+          echo "$RUNNER_TEMP/archive-venv/bin" >> "$GITHUB_PATH"
       - name: Pack
         run: ./.ci/source.sh
       - name: Upload
@@ -92,7 +97,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.target }}-
       - name: Install tools
-        run: brew install ccache ninja spirv-tools
+        run: brew install ccache ninja spirv-tools ffmpeg
       - name: Build
         run: ./.ci/macos.sh
       - name: Prepare outputs for caching

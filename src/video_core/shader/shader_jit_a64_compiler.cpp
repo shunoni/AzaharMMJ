@@ -406,8 +406,7 @@ void JitShader::Compile_DestEnable(Instruction instr, QReg src) {
 void JitShader::Compile_SanitizedMul(QReg src1, QReg src2, QReg scratch0) {
     // AGY SPEED OPTIMIZATION: Skip NaN sanitization and emit a single FMUL.
     // This is faster but does not emulate the PICA's 0 * inf = 0 rule.
-    if (Settings::PerformanceHacksActive() &&
-        Settings::values.unsafe_fast_shader_math.GetValue()) {
+    if (Settings::PerformanceHacksActive() && Settings::values.unsafe_fast_shader_math.GetValue()) {
         FMUL(src1.S4(), src1.S4(), src2.S4());
         return;
     }
@@ -658,8 +657,7 @@ void JitShader::Compile_MOV(Instruction instr) {
 void JitShader::Compile_RCP(Instruction instr) {
     Compile_SwizzleSrc(instr, 1, instr.common.src1, SRC1);
 
-    if (Settings::PerformanceHacksActive() &&
-        Settings::values.unsafe_fast_shader_math.GetValue()) {
+    if (Settings::PerformanceHacksActive() && Settings::values.unsafe_fast_shader_math.GetValue()) {
         // AGY SPEED OPTIMIZATION: Use the hardware approximate reciprocal.
         FRECPE(SRC1.S4(), SRC1.S4());
     } else {
@@ -677,8 +675,7 @@ void JitShader::Compile_RCP(Instruction instr) {
 void JitShader::Compile_RSQ(Instruction instr) {
     Compile_SwizzleSrc(instr, 1, instr.common.src1, SRC1);
 
-    if (Settings::PerformanceHacksActive() &&
-        Settings::values.unsafe_fast_shader_math.GetValue()) {
+    if (Settings::PerformanceHacksActive() && Settings::values.unsafe_fast_shader_math.GetValue()) {
         // AGY SPEED OPTIMIZATION: Use the hardware approximate reciprocal square root.
         FRSQRTE(SRC1.S4(), SRC1.S4());
     } else {

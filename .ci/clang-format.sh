@@ -9,11 +9,13 @@ fi
 CLANG_FORMAT=clang-format
 $CLANG_FORMAT --version
 
-if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-    # Get list of every file modified in this pull request
+if [ -n "$COMMIT_RANGE" ]; then
+    # Only check files changed by this push/pull request. This fork carries a lot of
+    # pre-existing formatting drift, so linting every source file on each push drowns
+    # real regressions in noise.
     files_to_lint="$(git diff --name-only --diff-filter=ACMRTUXB $COMMIT_RANGE | grep '^src/[^.]*[.]\(cpp\|h\)$' || true)"
 else
-    # Check everything for branch pushes
+    # Fall back to checking everything.
     files_to_lint="$(find src/ -name '*.cpp' -or -name '*.h')"
 fi
 

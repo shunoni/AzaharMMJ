@@ -1043,8 +1043,7 @@ void RasterizerCache<T>::ValidateSurface(SurfaceId surface_id, PAddr addr, u32 s
     // Filtered mipmaps often look really bad. We can achieve better quality by
     // generating them from the base level.
     if (surface.res_scale != 1 && level != 0 &&
-        !(Settings::PerformanceHacksActive() &&
-          Settings::values.unsafe_skip_mipmaps.GetValue())) {
+        !(Settings::PerformanceHacksActive() && Settings::values.unsafe_skip_mipmaps.GetValue())) {
         runtime.GenerateMipmaps(surface);
     }
 }

@@ -275,9 +275,8 @@ void RasterizerOpenGL::SyncDrawState() {
     state.cull.mode = is_flipped && state.cull.enabled ? GL_FRONT : GL_BACK;
     // SyncBlendEnabled();
     // AGY SPEED OPTIMIZATION: force every draw opaque.
-    state.blend.enabled =
-        (regs.framebuffer.output_merger.alphablend_enable == 1) &&
-        !(perf_hacks && Settings::values.unsafe_disable_alpha_blend.GetValue());
+    state.blend.enabled = (regs.framebuffer.output_merger.alphablend_enable == 1) &&
+                          !(perf_hacks && Settings::values.unsafe_disable_alpha_blend.GetValue());
     // SyncBlendFuncs();
     const bool has_minmax_factor = driver.HasBlendMinMaxFactor();
     state.blend.rgb_equation = PicaToGL::BlendEquation(
@@ -477,8 +476,7 @@ bool RasterizerOpenGL::SetupGeometryShader() {
 bool RasterizerOpenGL::AccelerateDrawBatch(bool is_indexed) {
     // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes before
     // any vertex analysis or upload work is done.
-    if (regs.framebuffer.IsShadowRendering() &&
-        Settings::PerformanceHacksActive() &&
+    if (regs.framebuffer.IsShadowRendering() && Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
         return true;
     }
@@ -686,8 +684,8 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
 
     vertex_batch.clear();
 
-    if (shadow_rendering && !(Settings::PerformanceHacksActive() &&
-                              Settings::values.unsafe_skip_gpu_sync.GetValue())) {
+    if (shadow_rendering &&
+        !(Settings::PerformanceHacksActive() && Settings::values.unsafe_skip_gpu_sync.GetValue())) {
         glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT |
                         GL_TEXTURE_UPDATE_BARRIER_BIT | GL_FRAMEBUFFER_BARRIER_BIT);
     }

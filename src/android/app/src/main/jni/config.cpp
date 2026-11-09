@@ -2,12 +2,12 @@
 // Licensed under GPLv2 or any later version
 // Refer to the misc/licenses/gplv2.txt file included.
 
-#include <array>
-#include <iomanip>
-#include <cctype>
 #include <algorithm>
-#include <memory>
+#include <array>
+#include <cctype>
+#include <iomanip>
 #include <map>
+#include <memory>
 #include <ranges>
 #include <sstream>
 #include <string_view>
@@ -518,13 +518,13 @@ void Config::Reload() {
 
     const bool legacy_global_value = Settings::values.use_per_game_settings.GetValue();
     const INIReader game_config_reader(game_config_buffer.c_str(), game_config_buffer.size());
-    const std::string per_game_setting = game_config_reader.Get(
-        "Debugging", Settings::values.use_per_game_settings.GetLabel(), "");
+    const std::string per_game_setting =
+        game_config_reader.Get("Debugging", Settings::values.use_per_game_settings.GetLabel(), "");
     const bool use_per_game_settings =
         per_game_setting.empty()
             ? legacy_global_value
-            : game_config_reader.GetBoolean("Debugging",
-                                            Settings::values.use_per_game_settings.GetLabel(), false);
+            : game_config_reader.GetBoolean(
+                  "Debugging", Settings::values.use_per_game_settings.GetLabel(), false);
     Settings::values.use_per_game_settings = use_per_game_settings;
     if (!use_per_game_settings) {
         return;

@@ -143,10 +143,8 @@ void ConfigureDebug::SetConfiguration() {
     ui->prevent_frame_limiter_catch_up->setChecked(
         Settings::values.prevent_frame_limiter_catch_up.GetValue());
     ui->realtime_gpu->setChecked(Settings::values.realtime_gpu.GetValue());
-    ui->mii_compatibility_fixes->setChecked(
-        Settings::values.mii_compatibility_fixes.GetValue());
-    ui->enable_performance_hacks->setChecked(
-        Settings::values.enable_performance_hacks.GetValue());
+    ui->mii_compatibility_fixes->setChecked(Settings::values.mii_compatibility_fixes.GetValue());
+    ui->enable_performance_hacks->setChecked(Settings::values.enable_performance_hacks.GetValue());
 
     ui->toggle_renderer_debug->setChecked(Settings::values.renderer_debug.GetValue());
     ui->toggle_pica_debugging->setChecked(Settings::values.pica_debugging.GetValue());

@@ -905,8 +905,7 @@ bool RendererOpenGL::TryPresent(int timeout_ms, bool is_secondary) {
         LOG_DEBUG(Render_OpenGL, "Reloading present frame");
         window.mailbox->ReloadPresentFrame(frame, layout.width, layout.height);
     }
-    if (!(Settings::PerformanceHacksActive() &&
-          Settings::values.unsafe_skip_gpu_sync.GetValue())) {
+    if (!(Settings::PerformanceHacksActive() && Settings::values.unsafe_skip_gpu_sync.GetValue())) {
         glWaitSync(frame->render_fence, 0, GL_TIMEOUT_IGNORED);
     }
     // INTEL workaround.

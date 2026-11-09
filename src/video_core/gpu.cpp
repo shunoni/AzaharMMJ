@@ -526,9 +526,9 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
         if (impl->realtime_has_frame_time) {
             const auto work = impl->system.perf_stats->GetLastSystemFrameTime();
             impl->realtime_debt += work - frame_budget;
-            impl->realtime_debt = std::clamp(impl->realtime_debt, std::chrono::microseconds{0},
-                                             std::chrono::duration_cast<std::chrono::microseconds>(
-                                                 max_debt));
+            impl->realtime_debt =
+                std::clamp(impl->realtime_debt, std::chrono::microseconds{0},
+                           std::chrono::duration_cast<std::chrono::microseconds>(max_debt));
         }
         impl->realtime_has_frame_time = true;
 
