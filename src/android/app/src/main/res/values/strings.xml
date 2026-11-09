@@ -458,7 +458,7 @@
     <string name="enable_performance_hacks">Enable Performance Hacks</string>
     <string name="enable_performance_hacks_description">Master switch for every performance hack. Turning this off forces all hacks below to behave like stock Azahar without changing their individual toggles. Restart Azahar after changing this setting.</string>
     <string name="mii_compatibility_fixes">Mii Compatibility Fixes</string>
-    <string name="mii_compatibility_fixes_description">Restores full shader precision and texture synchronization to address Mii face artifacts or editor crashes. While enabled, performance hacks are ignored so rendering stays accurate. This can reduce performance in Mii-heavy games. Restart Azahar after changing this setting.</string>
+    <string name="mii_compatibility_fixes_description">Restores full shader precision and texture synchronization to address Mii face artifacts or editor crashes. This overrides the shader precision and texture cache hacks while leaving the other performance hacks enabled. May reduce performance in Mii-heavy games. Restart Azahar after changing this setting.</string>
     <string name="use_per_game_settings">Use Per-Game Settings</string>
     <string name="use_per_game_settings_description">When enabled, this game uses and saves its own settings. When disabled, it uses and updates the global settings. Each game has its own switch.</string>
     <string name="delay_start_lle_modules">Delay Start With LLE Modules</string>

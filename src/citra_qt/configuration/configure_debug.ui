@@ -343,7 +343,7 @@
       <item row="7" column="0">
        <widget class="QCheckBox" name="mii_compatibility_fixes">
         <property name="toolTip">
-         <string>Restores full shader precision and texture synchronization to fix Mii face artifacts and editor crashes. Performance hacks are ignored while this is enabled. Restart Azahar after changing this setting.</string>
+         <string>Restores full shader precision and texture synchronization to fix Mii face artifacts and editor crashes. This overrides the shader precision and texture cache hacks while leaving the other performance hacks enabled. Restart Azahar after changing this setting.</string>
         </property>
         <property name="text">
          <string>Mii compatibility fixes (takes priority over performance hacks)</string>

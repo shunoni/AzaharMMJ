@@ -216,10 +216,6 @@ u64 GetShaderCacheSettingsHash() {
     return hash;
 }
 
-bool PerformanceHacksActive() {
-    return values.enable_performance_hacks.GetValue() && !values.mii_compatibility_fixes.GetValue();
-}
-
 void SetConfiguringGlobal(bool is_global) {
     configuring_global = is_global;
 }

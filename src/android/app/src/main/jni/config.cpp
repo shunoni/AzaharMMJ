@@ -114,7 +114,15 @@ void AddIniBuffer(std::string_view buffer,
         std::string value = TrimIniWhitespace(line.substr(equals + 1));
         if (!key.empty()) {
             if (skip_global_only_keys && IsGlobalOnlyDebugKey(section, key)) {
-                continue;
+                // Older builds stored the performance hacks only in the per-game INI.
+                // Ignore the per-game copy only when the global config actually sets the
+                // key; otherwise upgrading would silently turn every hack off.
+                const auto existing =
+                    values.find({NormalizeIniName(section), NormalizeIniName(key)});
+                if (existing != values.end() &&
+                    !TrimIniWhitespace(existing->second.value).empty()) {
+                    continue;
+                }
             }
             values[{NormalizeIniName(section), NormalizeIniName(key)}] =
                 IniValue{section, std::move(key), std::move(value)};

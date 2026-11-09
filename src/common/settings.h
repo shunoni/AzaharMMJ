@@ -715,10 +715,12 @@ void LogSettings();
 // Hash of the settings that affect generated shader source. Used to invalidate shader caches.
 u64 GetShaderCacheSettingsHash();
 
-// Whether the accuracy-breaking performance hacks may be applied. Enabling the Mii
-// compatibility fixes forces the accuracy-first paths so the face fix also works while
-// the performance hacks are otherwise on.
-bool PerformanceHacksActive();
+// Whether the accuracy-breaking performance hacks may be applied. This only tracks the
+// master switch; the few hacks that conflict with the Mii compatibility fixes check that
+// setting directly instead. Kept inline because it is queried from hot draw/cache paths.
+inline bool PerformanceHacksActive() {
+    return values.enable_performance_hacks.GetValue();
+}
 
 // Restore the global state of all applicable settings in the Values struct
 void RestoreGlobalState(bool is_powered_on);
