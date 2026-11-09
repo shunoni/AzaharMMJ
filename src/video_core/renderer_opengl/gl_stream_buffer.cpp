@@ -68,7 +68,7 @@ std::tuple<u8*, GLintptr, bool> OGLStreamBuffer::Map(GLsizeiptr size, GLintptr a
     // unsynchronized mapping, trading correctness for fewer driver stalls. The
     // texture buffers keep the safe invalidate path.
     const bool unsafe_stream_buffer =
-        Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::PerformanceHacksActive() &&
         Settings::values.gl_unsafe_stream_buffer.GetValue() && gl_target != GL_TEXTURE_BUFFER;
 
     bool invalidate = false;

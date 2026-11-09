@@ -22,6 +22,7 @@ import org.citra.citra_emu.features.settings.model.IntListSetting
 import org.citra.citra_emu.features.settings.model.IntSetting
 import org.citra.citra_emu.features.settings.model.ScaledFloatSetting
 import org.citra.citra_emu.features.settings.model.SettingSection
+import org.citra.citra_emu.features.settings.model.Settings
 import org.citra.citra_emu.features.settings.model.Settings.SettingsSectionMap
 import org.citra.citra_emu.features.settings.model.StringSetting
 import org.citra.citra_emu.features.settings.ui.SettingsActivityView
@@ -179,6 +180,11 @@ object SettingsFile {
     }
 
     fun saveCurrentGameSetting(setting: AbstractSetting, fileName: String = FILE_NAME_CONFIG) {
+        // Device-level toggles always belong to the global config.
+        if (setting.key in Settings.GLOBAL_ONLY_DEBUG_KEYS) {
+            saveFile(fileName, setting)
+            return
+        }
         if (NativeLibrary.isRunning()) {
             val gameId = String.format("%016X", NativeLibrary.getRunningTitleId())
             if (isPerGameSettingsEnabled(gameId)) {

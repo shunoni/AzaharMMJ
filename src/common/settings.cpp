@@ -178,6 +178,7 @@ void LogSettings() {
     log_setting("Debugging_UsePerGameSettings", values.use_per_game_settings.GetValue());
     log_setting("Debugging_PreventFrameLimiterCatchUp",
                 values.prevent_frame_limiter_catch_up.GetValue());
+    log_setting("Debugging_RealtimeGpu", values.realtime_gpu.GetValue());
     log_setting("Debugging_EnablePerformanceHacks", values.enable_performance_hacks.GetValue());
     log_setting("Debugging_UnsafeCpuOptimizations", values.unsafe_cpu_optimizations.GetValue());
     log_setting("Debugging_SkipSlowDrawFallback", values.skip_slow_draw_fallback.GetValue());
@@ -220,6 +221,11 @@ u64 GetShaderCacheSettingsHash() {
     mix(static_cast<u64>(values.fast_shader_precision.GetValue()));
     mix(static_cast<u64>(values.mii_compatibility_fixes.GetValue()));
     return hash;
+}
+
+bool PerformanceHacksActive() {
+    return values.enable_performance_hacks.GetValue() &&
+           !values.mii_compatibility_fixes.GetValue();
 }
 
 void SetConfiguringGlobal(bool is_global) {

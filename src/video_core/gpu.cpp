@@ -2,9 +2,12 @@
 // Licensed under GPLv2 or any later version
 // Refer to the misc/licenses/gplv2.txt file included.
 
+#include <algorithm>
+#include <chrono>
 #include "common/archives.h"
 #include "common/hacks/hack_manager.h"
 #include "common/microprofile.h"
+#include "common/settings.h"
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "core/hle/service/gsp/gsp_gpu.h"
@@ -490,6 +493,68 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
     impl->signal_interrupt(Service::GSP::InterruptId::PDC0, 0);
     impl->signal_interrupt(Service::GSP::InterruptId::PDC1, 0);
 
+    const bool realtime_gpu =
+        Settings::PerformanceHacksActive() && Settings::values.realtime_gpu.GetValue();
+
+    if (realtime_gpu) {
+        // Real-time GPU: keep advancing guest time while the host GPU is busy. Frames
+        // that take longer than the console's frame budget build debt; following frames
+        // then skip drawing until the debt is paid back. The game therefore keeps running
+        // at the configured speed even when the renderer can only present a few frames.
+        constexpr auto frame_budget = std::chrono::microseconds{
+            static_cast<s64>(FRAME_TICKS * 1'000'000ull / BASE_CLOCK_RATE_ARM11)};
+        constexpr auto max_debt = std::chrono::milliseconds(500);
+        // Never leave the screen unchanged for longer than this, even if the GPU is so
+        // slow that it cannot repay its debt. 200 ms is about five presented frames a second.
+        constexpr auto max_skip_time = std::chrono::milliseconds(200);
+        // Ignore small scheduling jitter so a steady 100% frame does not start skipping.
+        constexpr auto skip_threshold = std::chrono::milliseconds(1);
+        const auto now = std::chrono::steady_clock::now();
+
+        if (impl->realtime_skip_draws) {
+            impl->system.perf_stats->StartSwap();
+            impl->renderer->OnSkippedFrame();
+            impl->system.perf_stats->EndSwap();
+        } else {
+            impl->renderer->SwapBuffers();
+            impl->realtime_last_draw = now;
+        }
+
+        // EndSystemFrame measured this frame without the frame limiter's sleep, so it is
+        // a good estimate of how much real time the GPU work actually took. The very
+        // first frame has no useful start point, so do not let it build fake debt.
+        if (impl->realtime_has_frame_time) {
+            const auto work = impl->system.perf_stats->GetLastSystemFrameTime();
+            impl->realtime_debt += work - frame_budget;
+            impl->realtime_debt = std::clamp(impl->realtime_debt, std::chrono::microseconds{0},
+                                             std::chrono::duration_cast<std::chrono::microseconds>(
+                                                 max_debt));
+        }
+        impl->realtime_has_frame_time = true;
+
+        bool skip_next = impl->realtime_debt > skip_threshold;
+        if (skip_next && (impl->realtime_last_draw == std::chrono::steady_clock::time_point{} ||
+                          now - impl->realtime_last_draw >= max_skip_time)) {
+            // Do not let the screen freeze forever if even the skipped frames are too
+            // slow. Skip the remaining debt so the forced frame is actually shown.
+            skip_next = false;
+            impl->realtime_debt = std::chrono::microseconds::zero();
+        }
+
+        impl->realtime_skip_draws = skip_next;
+        impl->pica.SetSkipDraws(skip_next);
+
+        // Reschedule recurrent event
+        impl->timing.ScheduleEvent(FRAME_TICKS - cycles_late, impl->vblank_event);
+        return;
+    }
+
+    impl->pica.SetSkipDraws(false);
+    impl->realtime_skip_draws = false;
+    impl->realtime_has_frame_time = false;
+    impl->realtime_debt = std::chrono::microseconds::zero();
+    impl->realtime_last_draw = {};
+
     // Skip only frame composition/presentation. Guest timing, GPU events, input and audio
     // continue to run at the normal rate.
     u32 frame_skip_mode = Settings::values.frame_skip_mode.GetValue();
@@ -515,6 +580,13 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
 }
 
 void GPU::RecreateRenderer(Frontend::EmuWindow& emu_window, Frontend::EmuWindow* secondary_window) {
+    // A new context starts with no frame timing history to measure against.
+    impl->pica.SetSkipDraws(false);
+    impl->realtime_skip_draws = false;
+    impl->realtime_has_frame_time = false;
+    impl->realtime_debt = std::chrono::microseconds::zero();
+    impl->realtime_last_draw = {};
+
     // Reset the renderer (this will destroy OpenGL resources)
     impl->renderer.reset();
 
@@ -554,6 +626,12 @@ void GPU::RecreateRenderer(Frontend::EmuWindow& emu_window, Frontend::EmuWindow*
 }
 
 void GPU::ReleaseRenderer() {
+    impl->pica.SetSkipDraws(false);
+    impl->realtime_skip_draws = false;
+    impl->realtime_has_frame_time = false;
+    impl->realtime_debt = std::chrono::microseconds::zero();
+    impl->realtime_last_draw = {};
+
     // Just reset the renderer to release OpenGL resources
     // Don't null out rasterizer pointer as it will become dangling
     impl->renderer.reset();

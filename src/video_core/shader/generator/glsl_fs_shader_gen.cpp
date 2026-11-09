@@ -1271,7 +1271,7 @@ void FragmentModule::DefineExtensions() {
 
     if (!profile.is_vulkan) {
         const bool use_fast_precision =
-            Settings::values.enable_performance_hacks.GetValue() &&
+            Settings::PerformanceHacksActive() &&
             Settings::values.fast_shader_precision.GetValue();
         out += (Settings::values.mii_compatibility_fixes.GetValue() || !use_fast_precision)
                    ? fragment_shader_precision_OES_mii_compat

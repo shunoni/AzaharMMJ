@@ -114,6 +114,15 @@ void PerfStats::EndGameFrame() {
     PerfStats::game_frames_updated = true;
 }
 
+std::chrono::microseconds PerfStats::GetLastSystemFrameTime() const {
+    std::scoped_lock lock{object_mutex};
+    if (current_index == 0) {
+        return std::chrono::microseconds::zero();
+    }
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::duration<double, std::milli>(perf_history[current_index - 1]));
+}
+
 double PerfStats::GetMeanFrametime() const {
     std::scoped_lock lock{object_mutex};
 
@@ -255,7 +264,13 @@ void FrameLimiter::DoFrameLimiting(microseconds current_system_time_us) {
     frame_limiting_delta_err -= duration_cast<microseconds>(now - previous_walltime);
     frame_limiting_delta_err =
         std::clamp(frame_limiting_delta_err, -max_lag_time_us, max_lag_time_us);
-    if (Settings::values.prevent_frame_limiter_catch_up) {
+
+    // Real-time GPU already trades rendered frames for emulation speed, so let the
+    // limiter run at the configured speed instead of paying the debt back in a burst.
+    const bool avoid_catch_up =
+        Settings::values.prevent_frame_limiter_catch_up.GetValue() ||
+        (Settings::PerformanceHacksActive() && Settings::values.realtime_gpu.GetValue());
+    if (avoid_catch_up) {
         frame_limiting_delta_err = std::max(frame_limiting_delta_err, microseconds::zero());
     }
 
@@ -267,7 +282,7 @@ void FrameLimiter::DoFrameLimiting(microseconds current_system_time_us) {
         }
         auto now_after_sleep = Clock::now();
         frame_limiting_delta_err -= duration_cast<microseconds>(now_after_sleep - now);
-        if (Settings::values.prevent_frame_limiter_catch_up) {
+        if (avoid_catch_up) {
             frame_limiting_delta_err = std::max(frame_limiting_delta_err, microseconds::zero());
         }
         now = now_after_sleep;

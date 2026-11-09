@@ -24,6 +24,11 @@ enum class BooleanSetting(
         Settings.SECTION_DEBUG,
         false
     ),
+    REALTIME_GPU(
+        SettingKeys.realtime_gpu(),
+        Settings.SECTION_DEBUG,
+        false
+    ),
     ENABLE_PERFORMANCE_HACKS(
         SettingKeys.enable_performance_hacks(),
         Settings.SECTION_DEBUG,

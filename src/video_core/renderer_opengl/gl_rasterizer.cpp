@@ -258,7 +258,7 @@ void RasterizerOpenGL::SwitchDiskResources(u64 title_id) {
 void RasterizerOpenGL::SyncDrawState() {
     SyncDrawUniforms();
 
-    const bool perf_hacks = Settings::values.enable_performance_hacks.GetValue();
+    const bool perf_hacks = Settings::PerformanceHacksActive();
 
     // SyncClipEnabled();
     state.clip_distance[1] = regs.rasterizer.clip_enable != 0;
@@ -478,7 +478,7 @@ bool RasterizerOpenGL::AccelerateDrawBatch(bool is_indexed) {
     // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes before
     // any vertex analysis or upload work is done.
     if (regs.framebuffer.IsShadowRendering() &&
-        Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
         return true;
     }
@@ -575,7 +575,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
     const bool has_stencil = regs.framebuffer.HasStencil();
 
     // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes.
-    if (shadow_rendering && Settings::values.enable_performance_hacks.GetValue() &&
+    if (shadow_rendering && Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
         vertex_batch.clear();
         return true;
@@ -686,7 +686,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
 
     vertex_batch.clear();
 
-    if (shadow_rendering && !(Settings::values.enable_performance_hacks.GetValue() &&
+    if (shadow_rendering && !(Settings::PerformanceHacksActive() &&
                               Settings::values.unsafe_skip_gpu_sync.GetValue())) {
         glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT |
                         GL_TEXTURE_UPDATE_BARRIER_BIT | GL_FRAMEBUFFER_BARRIER_BIT);

@@ -1984,6 +1984,15 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
             )
             add(
                 SwitchSetting(
+                    BooleanSetting.REALTIME_GPU,
+                    R.string.realtime_gpu,
+                    R.string.realtime_gpu_description,
+                    BooleanSetting.REALTIME_GPU.key,
+                    BooleanSetting.REALTIME_GPU.defaultValue
+                )
+            )
+            add(
+                SwitchSetting(
                     BooleanSetting.UNSAFE_CPU_OPTIMIZATIONS,
                     R.string.unsafe_cpu_optimizations,
                     R.string.unsafe_cpu_optimizations_description,

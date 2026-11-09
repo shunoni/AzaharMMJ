@@ -108,6 +108,7 @@ object SettingKeys {
     external fun gdbstub_port(): String
     external fun instant_debug_log(): String
     external fun prevent_frame_limiter_catch_up(): String
+    external fun realtime_gpu(): String
     external fun enable_performance_hacks(): String
     external fun unsafe_cpu_optimizations(): String
     external fun skip_slow_draw_fallback(): String

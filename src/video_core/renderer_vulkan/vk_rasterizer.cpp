@@ -190,7 +190,7 @@ void RasterizerVulkan::LoadDefaultDiskResources(
 void RasterizerVulkan::SyncDrawState() {
     SyncDrawUniforms();
 
-    const bool perf_hacks = Settings::values.enable_performance_hacks.GetValue();
+    const bool perf_hacks = Settings::PerformanceHacksActive();
 
     // SyncCullMode();
     pipeline_info.state.rasterization.cull_mode.Assign(regs.rasterizer.cull_mode);
@@ -458,7 +458,7 @@ bool RasterizerVulkan::AccelerateDrawBatch(bool is_indexed) {
     // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes before
     // any vertex analysis or upload work is done.
     if (regs.framebuffer.IsShadowRendering() &&
-        Settings::values.enable_performance_hacks.GetValue() &&
+        Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
         return true;
     }
@@ -577,7 +577,7 @@ void RasterizerVulkan::SetupIndexArray() {
 // frames. Meshes seen more than once in the same frame are never culled because
 // the key cannot distinguish their instances.
 bool RasterizerVulkan::OcclusionEligible(const Framebuffer* framebuffer) const {
-    if (!Settings::values.enable_performance_hacks.GetValue() ||
+    if (!Settings::PerformanceHacksActive() ||
         !Settings::values.unsafe_cull_occluded_draws.GetValue()) {
         return false;
     }
@@ -676,7 +676,7 @@ void RasterizerVulkan::UpdateOcclusion() {
         }
     }
 
-    const bool enabled = Settings::values.enable_performance_hacks.GetValue() &&
+    const bool enabled = Settings::PerformanceHacksActive() &&
                          Settings::values.unsafe_cull_occluded_draws.GetValue();
 
     bool all_resolved = true;
@@ -751,7 +751,7 @@ bool RasterizerVulkan::Draw(bool accelerate, bool is_indexed) {
     const bool has_stencil = regs.framebuffer.HasStencil();
 
     // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes.
-    if (shadow_rendering && Settings::values.enable_performance_hacks.GetValue() &&
+    if (shadow_rendering && Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
         vertex_batch.clear();
         return true;
