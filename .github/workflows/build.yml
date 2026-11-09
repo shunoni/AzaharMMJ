@@ -97,7 +97,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.target }}-
       - name: Install tools
-        run: brew install ccache ninja spirv-tools ffmpeg
+        run: |
+          brew install ccache ninja spirv-tools ffmpeg@7
+          # Azahar currently expects FFmpeg 7's libavutil 59; Homebrew's default
+          # ffmpeg is newer and fails the version check.
+          brew link --force ffmpeg@7
       - name: Build
         run: ./.ci/macos.sh
       - name: Prepare outputs for caching
