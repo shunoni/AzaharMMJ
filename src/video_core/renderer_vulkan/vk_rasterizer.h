@@ -5,6 +5,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <vector>
 
 #include "video_core/rasterizer_accelerated.h"
 #include "video_core/renderer_vulkan/vk_descriptor_update_queue.h"
@@ -162,6 +163,8 @@ private:
 
     vk::UniqueQueryPool occlusion_pool;
     std::unordered_map<u64, OcclusionMesh> occlusion_meshes;
+    std::vector<u64> occlusion_query_keys;
+    std::vector<u64> occlusion_query_results;
     u64 occlusion_frame{};
     u32 occlusion_cursor{};
     u32 occlusion_pool_size{};

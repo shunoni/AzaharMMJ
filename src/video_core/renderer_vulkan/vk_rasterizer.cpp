@@ -121,6 +121,8 @@ RasterizerVulkan::RasterizerVulkan(Memory::MemorySystem& memory, Pica::PicaCore&
 
     // Occlusion queries used by the optional Vulkan draw-culling speed hack.
     occlusion_pool_size = OCCLUSION_QUERY_COUNT;
+    occlusion_query_keys.reserve(occlusion_pool_size);
+    occlusion_query_results.resize(static_cast<std::size_t>(occlusion_pool_size) * 2);
     occlusion_pool = device.createQueryPoolUnique({
         .queryType = vk::QueryType::eOcclusion,
         .queryCount = occlusion_pool_size,
@@ -655,6 +657,7 @@ u32 RasterizerVulkan::AcquireOcclusionQuery(u64 key) {
     }
     mesh.query = occlusion_cursor++;
     mesh.pending = true;
+    occlusion_query_keys.push_back(key);
     return mesh.query;
 }
 
@@ -662,7 +665,7 @@ void RasterizerVulkan::UpdateOcclusion() {
     ++occlusion_frame;
 
     // Keep the per-mesh cache bounded on long sessions.
-    if (occlusion_meshes.size() > OCCLUSION_MAX_MESHES) {
+    if (occlusion_meshes.size() > OCCLUSION_MAX_MESHES && occlusion_frame % 120 == 0) {
         for (auto it = occlusion_meshes.begin(); it != occlusion_meshes.end();) {
             const OcclusionMesh& mesh = it->second;
             if (!mesh.pending && mesh.seen_frame + 120 < occlusion_frame) {
@@ -677,25 +680,40 @@ void RasterizerVulkan::UpdateOcclusion() {
                          Settings::values.unsafe_cull_occluded_draws.GetValue();
 
     bool all_resolved = true;
-    for (auto& entry : occlusion_meshes) {
-        OcclusionMesh& mesh = entry.second;
-        if (!mesh.pending) {
-            continue;
-        }
-        u64 result = 0;
+    if (occlusion_cursor != 0) {
+        const auto query_count = static_cast<std::size_t>(occlusion_cursor);
+        // Poll the whole frame's query batch in one driver call without waiting for unfinished
+        // results.
         const vk::Result status = instance.GetDevice().getQueryPoolResults(
-            *occlusion_pool, mesh.query, 1, sizeof(result), &result, sizeof(result),
-            vk::QueryResultFlagBits::e64);
-        if (status == vk::Result::eSuccess) {
-            mesh.pending = false;
-            if (result == 0 && !mesh.shared) {
-                mesh.hidden_until = occlusion_frame + OCCLUSION_HIDDEN_FRAMES;
-            }
-        } else {
-            // eNotReady is normal while the GPU is still behind. Any other error is
-            // treated as unresolved too, so the pool is never reset while it may
-            // still be in use and culling simply stays off.
+            *occlusion_pool, 0, occlusion_cursor, query_count * 2 * sizeof(u64),
+            occlusion_query_results.data(), 2 * sizeof(u64),
+            vk::QueryResultFlagBits::e64 | vk::QueryResultFlagBits::eWithAvailability |
+                vk::QueryResultFlagBits::ePartial);
+        if (status != vk::Result::eSuccess && status != vk::Result::eNotReady) {
+            LOG_ERROR(Render_Vulkan, "Failed to retrieve Vulkan occlusion query results: {}",
+                      vk::to_string(status));
             all_resolved = false;
+        } else {
+            for (std::size_t i = 0; i < query_count; ++i) {
+                const u64 result = occlusion_query_results[i * 2];
+                const u64 available = occlusion_query_results[i * 2 + 1];
+                if (available == 0) {
+                    all_resolved = false;
+                    continue;
+                }
+
+                const auto mesh_it = occlusion_meshes.find(occlusion_query_keys[i]);
+                if (mesh_it == occlusion_meshes.end()) {
+                    LOG_ERROR(Render_Vulkan, "Missing mesh for pending Vulkan occlusion query");
+                    all_resolved = false;
+                    continue;
+                }
+                OcclusionMesh& mesh = mesh_it->second;
+                mesh.pending = false;
+                if (result == 0 && !mesh.shared) {
+                    mesh.hidden_until = occlusion_frame + OCCLUSION_HIDDEN_FRAMES;
+                }
+            }
         }
     }
 
@@ -723,6 +741,7 @@ void RasterizerVulkan::UpdateOcclusion() {
     scheduler.Record(
         [pool, count](vk::CommandBuffer cmdbuf) { cmdbuf.resetQueryPool(pool, 0, count); });
     occlusion_cursor = 0;
+    occlusion_query_keys.clear();
     occlusion_pool_ready = true;
 }
 
