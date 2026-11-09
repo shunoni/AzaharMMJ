@@ -32,4 +32,4 @@ And here's the performance side by side, also on my RGDS, with all ~~11~~ 10 spe
 | Mii Maker | 90-100% | 100% locked |
 | Mario 3D Land | 60-71% (no six seven 4 u) | 75-85% average |
 
-Not all games in the tested games were compared against upstream. Don't take this table for granted, results may vary on different hardware.
+Not all games in the tested games were compared against upstream. Don't take this table for granted, results may vary on different hardware. Some devices will be unable to run this.
