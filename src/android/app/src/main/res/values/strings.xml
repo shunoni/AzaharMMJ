@@ -413,8 +413,6 @@
     <string name="renderer_debug_description">Log additional graphics related debug information. When enabled, game performance will be significantly reduced.</string>
     <string name="instant_debug_log">Flush Log Output on Every Message</string>
     <string name="instant_debug_log_description">Immediately commits the debug log to file. Use this if Azahar crashes and the log output is being cut.</string>
-    <string name="prevent_frame_limiter_catch_up">Prevent Frame Limiter Speed-Up After Slow Frames</string>
-    <string name="prevent_frame_limiter_catch_up_description">Prevents emulation from running faster after a slow frame. When frames are consistently late, actual emulation speed may stay below the configured limit.</string>
     <string name="realtime_gpu">Real-time GPU</string>
     <string name="realtime_gpu_description">Keeps guest time running at full speed when the GPU cannot keep up by skipping drawing work instead of slowing the whole emulator down. The game can run at 100% speed at low FPS, but effects can be stale and games that read back the screen may glitch. Requires performance hacks.</string>
     <string name="unsafe_cpu_optimizations">Unsafe CPU Optimizations</string>

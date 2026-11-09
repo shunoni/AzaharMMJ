@@ -262,17 +262,14 @@ void FrameLimiter::DoFrameLimiting(microseconds current_system_time_us) {
         std::chrono::duration<double, std::chrono::microseconds::period>(
             (current_system_time_us - previous_system_time_us) / sleep_scale));
     frame_limiting_delta_err -= duration_cast<microseconds>(now - previous_walltime);
+    // Keep both lead and lag, but bound them so a single hitch cannot produce a long catch-up
+    // burst or stall the limiter forever. The negative (lag) side is required to preserve the
+    // average speed when frame costs vary, which is exactly what happens with frame skipping:
+    // render-heavy frames build up lag and the following light/skipped frames repay it. Dropping
+    // that lag makes the emulator run below the configured speed (roughly half speed with frame
+    // skip Mode 1), which defeats the point of the performance hacks.
     frame_limiting_delta_err =
         std::clamp(frame_limiting_delta_err, -max_lag_time_us, max_lag_time_us);
-
-    // Real-time GPU already trades rendered frames for emulation speed, so let the
-    // limiter run at the configured speed instead of paying the debt back in a burst.
-    const bool avoid_catch_up =
-        Settings::values.prevent_frame_limiter_catch_up.GetValue() ||
-        (Settings::PerformanceHacksActive() && Settings::values.realtime_gpu.GetValue());
-    if (avoid_catch_up) {
-        frame_limiting_delta_err = std::max(frame_limiting_delta_err, microseconds::zero());
-    }
 
     if (frame_limiting_delta_err > microseconds::zero()) {
         if (wait_callback) {
@@ -281,10 +278,9 @@ void FrameLimiter::DoFrameLimiting(microseconds current_system_time_us) {
             std::this_thread::sleep_for(frame_limiting_delta_err);
         }
         auto now_after_sleep = Clock::now();
+        // Subtract the real wait so oversleeping becomes credit for the next frame instead of a
+        // permanent slowdown.
         frame_limiting_delta_err -= duration_cast<microseconds>(now_after_sleep - now);
-        if (avoid_catch_up) {
-            frame_limiting_delta_err = std::max(frame_limiting_delta_err, microseconds::zero());
-        }
         now = now_after_sleep;
     }
 

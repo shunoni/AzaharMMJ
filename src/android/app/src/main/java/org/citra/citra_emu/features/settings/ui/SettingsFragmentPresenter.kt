@@ -1945,15 +1945,6 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                 )
             )
             add(
-                SwitchSetting(
-                    BooleanSetting.PREVENT_FRAME_LIMITER_CATCH_UP,
-                    R.string.prevent_frame_limiter_catch_up,
-                    R.string.prevent_frame_limiter_catch_up_description,
-                    BooleanSetting.PREVENT_FRAME_LIMITER_CATCH_UP.key,
-                    BooleanSetting.PREVENT_FRAME_LIMITER_CATCH_UP.defaultValue
-                )
-            )
-            add(
                 SingleChoiceSetting(
                     IntSetting.FRAME_SKIP_MODE,
                     R.string.frame_skip_mode,

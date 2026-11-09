@@ -493,8 +493,11 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
     impl->signal_interrupt(Service::GSP::InterruptId::PDC0, 0);
     impl->signal_interrupt(Service::GSP::InterruptId::PDC1, 0);
 
-    const bool realtime_gpu =
-        Settings::PerformanceHacksActive() && Settings::values.realtime_gpu.GetValue();
+    // An explicit frame-skip mode is the user's pacing choice; do not silently replace it
+    // with the adaptive real-time GPU draw skipping.
+    const bool realtime_gpu = Settings::PerformanceHacksActive() &&
+                              Settings::values.realtime_gpu.GetValue() &&
+                              Settings::values.frame_skip_mode.GetValue() == 0;
 
     if (realtime_gpu) {
         // Real-time GPU: keep advancing guest time while the host GPU is busy. Frames

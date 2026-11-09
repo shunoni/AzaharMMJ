@@ -140,8 +140,6 @@ void ConfigureDebug::SetConfiguration() {
     ui->toggle_unique_data_console_type->setChecked(
         Settings::values.toggle_unique_data_console_type.GetValue());
     ui->enable_exception_handler->setChecked(Settings::values.enable_exception_handler.GetValue());
-    ui->prevent_frame_limiter_catch_up->setChecked(
-        Settings::values.prevent_frame_limiter_catch_up.GetValue());
     ui->realtime_gpu->setChecked(Settings::values.realtime_gpu.GetValue());
     ui->mii_compatibility_fixes->setChecked(Settings::values.mii_compatibility_fixes.GetValue());
     ui->enable_performance_hacks->setChecked(Settings::values.enable_performance_hacks.GetValue());
@@ -193,8 +191,6 @@ void ConfigureDebug::ApplyConfiguration() {
     Settings::values.toggle_unique_data_console_type =
         ui->toggle_unique_data_console_type->isChecked();
     Settings::values.enable_exception_handler = ui->enable_exception_handler->isChecked();
-    Settings::values.prevent_frame_limiter_catch_up =
-        ui->prevent_frame_limiter_catch_up->isChecked();
     Settings::values.realtime_gpu = ui->realtime_gpu->isChecked();
     Settings::values.mii_compatibility_fixes = ui->mii_compatibility_fixes->isChecked();
     Settings::values.enable_performance_hacks = ui->enable_performance_hacks->isChecked();

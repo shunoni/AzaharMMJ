@@ -19,11 +19,6 @@ enum class BooleanSetting(
     ALLOW_PLUGIN_LOADER(SettingKeys.allow_plugin_loader(), Settings.SECTION_SYSTEM, true),
     SWAP_SCREEN(SettingKeys.swap_screen(), Settings.SECTION_LAYOUT, false),
     INSTANT_DEBUG_LOG(SettingKeys.instant_debug_log(), Settings.SECTION_DEBUG, false),
-    PREVENT_FRAME_LIMITER_CATCH_UP(
-        SettingKeys.prevent_frame_limiter_catch_up(),
-        Settings.SECTION_DEBUG,
-        false
-    ),
     REALTIME_GPU(
         SettingKeys.realtime_gpu(),
         Settings.SECTION_DEBUG,

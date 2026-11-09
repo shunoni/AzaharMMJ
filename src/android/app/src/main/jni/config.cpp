@@ -449,7 +449,6 @@ void Config::ReadValues() {
     ReadSetting("Debugging", Settings::values.enable_exception_handler);
     ReadSetting("Debugging", Settings::values.mii_compatibility_fixes);
     ReadSetting("Debugging", Settings::values.use_per_game_settings);
-    ReadSetting("Debugging", Settings::values.prevent_frame_limiter_catch_up);
     ReadSetting("Debugging", Settings::values.realtime_gpu);
     ReadSetting("Debugging", Settings::values.enable_performance_hacks);
     ReadSetting("Debugging", Settings::values.unsafe_cpu_optimizations);
