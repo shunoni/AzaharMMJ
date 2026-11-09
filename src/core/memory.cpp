@@ -991,7 +991,7 @@ void MemorySystem::RasterizerMarkRegionCached(PAddr start, u32 size, bool cached
 
     // AGY SPEED OPTIMIZATION: Avoid marking pages as rasterizer-cached. This trades
     // CPU/GPU memory coherence for a large reduction in page table churn.
-    if (Settings::values.enable_performance_hacks.GetValue() &&
+    if (Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_page_marking.GetValue()) {
         return;
     }

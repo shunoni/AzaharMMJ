@@ -372,7 +372,7 @@ std::unique_ptr<Dynarmic::A32::Jit> ARM_Dynarmic::MakeJit() {
     config.global_monitor = &exclusive_monitor.monitor;
 
     // AGY SPEED OPTIMIZATION: Enable aggressive unsafe optimizations for low-power ARM64
-    if (Settings::values.enable_performance_hacks.GetValue() &&
+    if (Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_cpu_optimizations.GetValue()) {
         config.unsafe_optimizations = true;
         config.optimizations = config.optimizations |

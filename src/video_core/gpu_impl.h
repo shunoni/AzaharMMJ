@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <chrono>
 #include "common/archives.h"
 #include "common/microprofile.h"
 #include "core/core.h"
@@ -37,6 +38,15 @@ struct GPU::Impl {
     Service::GSP::InterruptHandler signal_interrupt;
     u32 frame_skip_mode{};
     u32 frame_skip_counter{};
+
+    // Real-time GPU pacing. When enabled, frames that overrun their budget build up
+    // debt and the following frames skip drawing until the GPU has caught up. This
+    // keeps guest time advancing at the configured speed instead of slowing the whole
+    // emulator down to the render rate.
+    bool realtime_skip_draws{};
+    bool realtime_has_frame_time{};
+    std::chrono::microseconds realtime_debt{0};
+    std::chrono::steady_clock::time_point realtime_last_draw{};
 
     explicit Impl(Core::System& system, Frontend::EmuWindow& emu_window,
                   Frontend::EmuWindow* secondary_window)

@@ -118,6 +118,13 @@ public:
 
     void SetInterruptHandler(Service::GSP::InterruptHandler& signal_interrupt);
 
+    /// When set, draw commands update PICA state but do not submit vertex work or draw
+    /// calls. Used by the real-time GPU hack to keep guest time running when the host
+    /// GPU cannot keep up.
+    void SetSkipDraws(bool skip) {
+        skip_draws = skip;
+    }
+
     void ProcessCmdList(PAddr list, u32 size, bool ignore_list);
 
 private:
@@ -411,6 +418,7 @@ private:
     PrimitiveAssembler primitive_assembler;
     CommandList cmd_list;
     std::unique_ptr<ShaderEngine> shader_engine;
+    bool skip_draws{};
 };
 
 #define GPU_REG_INDEX(field_name) (offsetof(Pica::PicaCore::Regs, field_name) / sizeof(u32))

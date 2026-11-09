@@ -323,7 +323,9 @@ if (NOT WIN32)
         find_package(Qt6 REQUIRED COMPONENTS GuiPrivate)
         target_link_libraries(citra_qt PUBLIC Qt6::GuiPrivate)
     else()
-        target_include_directories(citra_qt PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
+        # PUBLIC so that citra_meta also gets the private Qt headers. qt_swizzle.mm is
+        # exposed as a PUBLIC source of citra_qt, so citra_meta compiles it too.
+        target_include_directories(citra_qt PUBLIC ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
     endif()
 endif()
 

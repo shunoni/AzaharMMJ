@@ -1007,6 +1007,12 @@ void PicaCore::SubmitImmediate(u32 value) {
 }
 
 void PicaCore::DrawImmediate() {
+    if (skip_draws) {
+        immediate.current_attribute = 0;
+        immediate.reset_geometry_pipeline = true;
+        return;
+    }
+
     // Compile the vertex shader.
     shader_engine->SetupBatch(vs_setup, regs.internal.vs.main_offset);
 
@@ -1078,6 +1084,14 @@ void PicaCore::DrawArrays(bool is_indexed) {
     delay_generator.AddVertices(regs.internal.pipeline.num_vertices,
                                 regs.internal.pipeline.triangle_topology);
 
+    // Real-time GPU: the host cannot keep up, so let guest time continue and skip the
+    // expensive vertex/draw work for this frame. The P3D interrupt is still raised by the
+    // command list, so the game's render thread does not stall.
+    if (skip_draws) {
+        primitive_assembler.Reset();
+        return;
+    }
+
     // Attempt to use hardware vertex shaders if possible.
     if (accelerate_draw && rasterizer->AccelerateDrawBatch(is_indexed)) {
         return;
@@ -1086,7 +1100,7 @@ void PicaCore::DrawArrays(bool is_indexed) {
     // MMJ Optimization (Skip Slow Draw):
     // If accelerated draw was requested but failed, skip slow CPU software vertex fallback
     // rather than bottlenecking weak Cortex-A55 cores.
-    if (accelerate_draw && Settings::values.enable_performance_hacks.GetValue() &&
+    if (accelerate_draw && Settings::PerformanceHacksActive() &&
         Settings::values.skip_slow_draw_fallback.GetValue()) {
         return;
     }

@@ -188,7 +188,7 @@ bool RasterizerCache<T>::AccelerateTextureCopy(const Pica::DisplayTransferConfig
 
     // AGY SPEED OPTIMIZATION: Skip GPU texture-to-texture copies entirely.
     // Render-to-texture effects reuse stale contents but the emulator keeps going.
-    if (Settings::values.enable_performance_hacks.GetValue() &&
+    if (Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_texture_copies.GetValue()) {
         return true;
     }
@@ -238,7 +238,7 @@ bool RasterizerCache<T>::AccelerateTextureCopy(const Pica::DisplayTransferConfig
         // AGY SPEED OPTIMIZATION (Citra MMJ skip_texture_copy): the source surface
         // cannot be resolved, so skip the copy instead of falling back to a slow
         // path. This is the safer per-game variant used for Mario Kart 7.
-        return Settings::values.enable_performance_hacks.GetValue() &&
+        return Settings::PerformanceHacksActive() &&
                Settings::values.unsafe_skip_unresolved_texture_copies.GetValue();
     }
 
@@ -1043,8 +1043,7 @@ void RasterizerCache<T>::ValidateSurface(SurfaceId surface_id, PAddr addr, u32 s
     // Filtered mipmaps often look really bad. We can achieve better quality by
     // generating them from the base level.
     if (surface.res_scale != 1 && level != 0 &&
-        !(Settings::values.enable_performance_hacks.GetValue() &&
-          Settings::values.unsafe_skip_mipmaps.GetValue())) {
+        !(Settings::PerformanceHacksActive() && Settings::values.unsafe_skip_mipmaps.GetValue())) {
         runtime.GenerateMipmaps(surface);
     }
 }
@@ -1141,7 +1140,7 @@ bool RasterizerCache<T>::UploadCustomSurface(SurfaceId surface_id, SurfaceInterv
         Surface& surface = slot_surfaces[surface_id];
         surface.UploadCustom(material, level);
         if (custom_tex_manager.SkipMipmaps() &&
-            !(Settings::values.enable_performance_hacks.GetValue() &&
+            !(Settings::PerformanceHacksActive() &&
               Settings::values.unsafe_skip_mipmaps.GetValue())) {
             runtime.GenerateMipmaps(surface);
         }
@@ -1287,7 +1286,7 @@ void RasterizerCache<T>::FlushRegion(PAddr addr, u32 size, SurfaceId flush_surfa
     // AGY SPEED OPTIMIZATION: Skip all GPU->CPU texture readbacks.
     // This is extremely dangerous for accuracy but removes the most expensive
     // synchronization path on low-power devices.
-    if (Settings::values.enable_performance_hacks.GetValue() &&
+    if (Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_texture_flush.GetValue()) {
         return;
     }
@@ -1365,12 +1364,12 @@ void RasterizerCache<T>::InvalidateRegion(PAddr addr, u32 size, SurfaceId region
             // AGY SPEED OPTIMIZATION (Citra MMJ skip_cpu_write): keep the cached GPU
             // texture even when the CPU writes this memory instead of flushing and
             // removing it. Textures can go stale, but streaming games get much faster.
-            if (Settings::values.enable_performance_hacks.GetValue() &&
+            if (Settings::PerformanceHacksActive() &&
                 Settings::values.unsafe_trust_cached_textures.GetValue()) {
                 return;
             }
             if (Settings::values.mii_compatibility_fixes.GetValue() ||
-                !Settings::values.enable_performance_hacks.GetValue() ||
+                !Settings::PerformanceHacksActive() ||
                 !Settings::values.fast_texture_invalidation.GetValue()) {
                 // Preserve GPU-rendered bytes before a game partially updates this memory on CPU.
                 FlushRegion(surface.addr, surface.size, surface_id);
@@ -1491,7 +1490,7 @@ void RasterizerCache<T>::UpdatePagesCachedCount(PAddr addr, u32 size, int delta)
     // AGY SPEED OPTIMIZATION: Skip cached-page reference tracking entirely. The
     // backing memory pages are never switched to rasterizer-cached pages, which
     // avoids all page table churn at the cost of CPU/GPU coherence.
-    if (Settings::values.enable_performance_hacks.GetValue() &&
+    if (Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_page_marking.GetValue()) {
         return;
     }

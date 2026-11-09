@@ -142,6 +142,9 @@ void ConfigureDebug::SetConfiguration() {
     ui->enable_exception_handler->setChecked(Settings::values.enable_exception_handler.GetValue());
     ui->prevent_frame_limiter_catch_up->setChecked(
         Settings::values.prevent_frame_limiter_catch_up.GetValue());
+    ui->realtime_gpu->setChecked(Settings::values.realtime_gpu.GetValue());
+    ui->mii_compatibility_fixes->setChecked(Settings::values.mii_compatibility_fixes.GetValue());
+    ui->enable_performance_hacks->setChecked(Settings::values.enable_performance_hacks.GetValue());
 
     ui->toggle_renderer_debug->setChecked(Settings::values.renderer_debug.GetValue());
     ui->toggle_pica_debugging->setChecked(Settings::values.pica_debugging.GetValue());
@@ -192,6 +195,9 @@ void ConfigureDebug::ApplyConfiguration() {
     Settings::values.enable_exception_handler = ui->enable_exception_handler->isChecked();
     Settings::values.prevent_frame_limiter_catch_up =
         ui->prevent_frame_limiter_catch_up->isChecked();
+    Settings::values.realtime_gpu = ui->realtime_gpu->isChecked();
+    Settings::values.mii_compatibility_fixes = ui->mii_compatibility_fixes->isChecked();
+    Settings::values.enable_performance_hacks = ui->enable_performance_hacks->isChecked();
     Settings::values.renderer_debug = ui->toggle_renderer_debug->isChecked();
     Settings::values.pica_debugging = ui->toggle_pica_debugging->isChecked();
     Settings::values.dump_command_buffers = ui->toggle_dump_command_buffers->isChecked();
@@ -218,6 +224,8 @@ void ConfigureDebug::SetupPerGameUI() {
     ui->groupBox_2->setVisible(false);
     ui->enable_rpc_server->setVisible(false);
     ui->toggle_unique_data_console_type->setVisible(false);
+    ui->mii_compatibility_fixes->setVisible(false);
+    ui->enable_performance_hacks->setVisible(false);
     ui->toggle_cpu_jit->setVisible(false);
     ui->toggle_fastinterp->setVisible(false);
 }

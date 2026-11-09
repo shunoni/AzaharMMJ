@@ -3,8 +3,17 @@
 mkdir -p build
 cd build
 
-if [ "$GITHUB_REF_TYPE" == "tag" ]; then
-	export EXTRA_CMAKE_FLAGS=(-DENABLE_QT_UPDATE_CHECKER=ON)
+EXTRA_CMAKE_FLAGS=()
+
+if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+	EXTRA_CMAKE_FLAGS=(-DENABLE_QT_UPDATE_CHECKER=ON)
+fi
+
+if [ "$TARGET" = "msvc" ]; then
+	# MSVC builds get FFmpeg from vcpkg, which the workflow installs beforehand.
+	EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}"
+		-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+		-DVCPKG_TARGET_TRIPLET=x64-windows-release)
 fi
 
 cmake .. -G Ninja \

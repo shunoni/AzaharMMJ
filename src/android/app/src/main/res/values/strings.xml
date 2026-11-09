@@ -415,6 +415,8 @@
     <string name="instant_debug_log_description">Immediately commits the debug log to file. Use this if Azahar crashes and the log output is being cut.</string>
     <string name="prevent_frame_limiter_catch_up">Prevent Frame Limiter Speed-Up After Slow Frames</string>
     <string name="prevent_frame_limiter_catch_up_description">Prevents emulation from running faster after a slow frame. When frames are consistently late, actual emulation speed may stay below the configured limit.</string>
+    <string name="realtime_gpu">Real-time GPU</string>
+    <string name="realtime_gpu_description">Keeps guest time running at full speed when the GPU cannot keep up by skipping drawing work instead of slowing the whole emulator down. The game can run at 100% speed at low FPS, but effects can be stale and games that read back the screen may glitch. Requires performance hacks.</string>
     <string name="unsafe_cpu_optimizations">Unsafe CPU Optimizations</string>
     <string name="unsafe_cpu_optimizations_description">Enables aggressive JIT optimizations that trade floating point accuracy and memory consistency for higher performance. Restart Azahar after changing this setting.</string>
     <string name="skip_slow_draw_fallback">Skip Slow Software Vertex Fallback</string>
@@ -456,7 +458,7 @@
     <string name="enable_performance_hacks">Enable Performance Hacks</string>
     <string name="enable_performance_hacks_description">Master switch for every performance hack. Turning this off forces all hacks below to behave like stock Azahar without changing their individual toggles. Restart Azahar after changing this setting.</string>
     <string name="mii_compatibility_fixes">Mii Compatibility Fixes</string>
-    <string name="mii_compatibility_fixes_description">Restores full shader precision and texture synchronization to address Mii face artifacts or editor crashes. This can reduce performance in Mii-heavy games. Restart Azahar after changing this setting.</string>
+    <string name="mii_compatibility_fixes_description">Restores full shader precision and texture synchronization to address Mii face artifacts or editor crashes. While enabled, performance hacks are ignored so rendering stays accurate. This can reduce performance in Mii-heavy games. Restart Azahar after changing this setting.</string>
     <string name="use_per_game_settings">Use Per-Game Settings</string>
     <string name="use_per_game_settings_description">When enabled, this game uses and saves its own settings. When disabled, it uses and updates the global settings. Each game has its own switch.</string>
     <string name="delay_start_lle_modules">Delay Start With LLE Modules</string>

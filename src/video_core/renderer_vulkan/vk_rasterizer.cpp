@@ -190,7 +190,7 @@ void RasterizerVulkan::LoadDefaultDiskResources(
 void RasterizerVulkan::SyncDrawState() {
     SyncDrawUniforms();
 
-    const bool perf_hacks = Settings::values.enable_performance_hacks.GetValue();
+    const bool perf_hacks = Settings::PerformanceHacksActive();
 
     // SyncCullMode();
     pipeline_info.state.rasterization.cull_mode.Assign(regs.rasterizer.cull_mode);
@@ -457,8 +457,7 @@ bool RasterizerVulkan::SetupGeometryShader() {
 bool RasterizerVulkan::AccelerateDrawBatch(bool is_indexed) {
     // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes before
     // any vertex analysis or upload work is done.
-    if (regs.framebuffer.IsShadowRendering() &&
-        Settings::values.enable_performance_hacks.GetValue() &&
+    if (regs.framebuffer.IsShadowRendering() && Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
         return true;
     }
@@ -517,8 +516,8 @@ bool RasterizerVulkan::AccelerateDrawBatchInternal(bool is_indexed, u64 occlusio
         .is_indexed = is_indexed,
     };
 
-    const u32 query = occlusion_eligible ? AcquireOcclusionQuery(occlusion_key)
-                                         : INVALID_OCCLUSION_QUERY;
+    const u32 query =
+        occlusion_eligible ? AcquireOcclusionQuery(occlusion_key) : INVALID_OCCLUSION_QUERY;
     const vk::QueryPool pool = *occlusion_pool;
 
     scheduler.Record([this, params, query, pool](vk::CommandBuffer cmdbuf) {
@@ -577,7 +576,7 @@ void RasterizerVulkan::SetupIndexArray() {
 // frames. Meshes seen more than once in the same frame are never culled because
 // the key cannot distinguish their instances.
 bool RasterizerVulkan::OcclusionEligible(const Framebuffer* framebuffer) const {
-    if (!Settings::values.enable_performance_hacks.GetValue() ||
+    if (!Settings::PerformanceHacksActive() ||
         !Settings::values.unsafe_cull_occluded_draws.GetValue()) {
         return false;
     }
@@ -624,13 +623,11 @@ u64 RasterizerVulkan::MakeOcclusionKey(const Framebuffer* framebuffer, bool is_i
     // The same mesh can be drawn through different viewports or scissors. Keep those
     // out of each other's visibility results.
     const auto viewport = regs.rasterizer.GetViewportRect();
-    key ^= (static_cast<u64>(draw_rect.left) << 8) ^
-           (static_cast<u64>(draw_rect.bottom) << 24) ^
+    key ^= (static_cast<u64>(draw_rect.left) << 8) ^ (static_cast<u64>(draw_rect.bottom) << 24) ^
            (static_cast<u64>(draw_rect.GetWidth()) << 40) ^
            (static_cast<u64>(draw_rect.GetHeight()) << 48);
     key ^= (static_cast<u64>(viewport.left) << 4) ^ (static_cast<u64>(viewport.top) << 20) ^
-           (static_cast<u64>(viewport.right) << 36) ^
-           (static_cast<u64>(viewport.bottom) << 52);
+           (static_cast<u64>(viewport.right) << 36) ^ (static_cast<u64>(viewport.bottom) << 52);
     return key;
 }
 
@@ -676,7 +673,7 @@ void RasterizerVulkan::UpdateOcclusion() {
         }
     }
 
-    const bool enabled = Settings::values.enable_performance_hacks.GetValue() &&
+    const bool enabled = Settings::PerformanceHacksActive() &&
                          Settings::values.unsafe_cull_occluded_draws.GetValue();
 
     bool all_resolved = true;
@@ -751,7 +748,7 @@ bool RasterizerVulkan::Draw(bool accelerate, bool is_indexed) {
     const bool has_stencil = regs.framebuffer.HasStencil();
 
     // AGY SPEED OPTIMIZATION: Skip the game's shadow-map rendering passes.
-    if (shadow_rendering && Settings::values.enable_performance_hacks.GetValue() &&
+    if (shadow_rendering && Settings::PerformanceHacksActive() &&
         Settings::values.unsafe_skip_shadow_rendering.GetValue()) {
         vertex_batch.clear();
         return true;
@@ -783,8 +780,7 @@ bool RasterizerVulkan::Draw(bool accelerate, bool is_indexed) {
     // AGY SPEED OPTIMIZATION: Skip heavy meshes that an occlusion query found
     // fully hidden in a recent frame.
     u64 occlusion_key = 0;
-    const bool occlusion_eligible =
-        accelerate && write_color_fb && OcclusionEligible(framebuffer);
+    const bool occlusion_eligible = accelerate && write_color_fb && OcclusionEligible(framebuffer);
     if (occlusion_eligible) {
         occlusion_key = MakeOcclusionKey(framebuffer, is_indexed, draw_rect);
         if (OcclusionShouldSkip(occlusion_key)) {

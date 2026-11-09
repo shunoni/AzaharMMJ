@@ -2,8 +2,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the misc/licenses/gplv2.txt file included.
 
-#include "video_core/shader/generator/glsl_fs_shader_gen.h"
 #include "common/settings.h"
+#include "video_core/shader/generator/glsl_fs_shader_gen.h"
 
 namespace Pica::Shader::Generator::GLSL {
 
@@ -37,7 +37,8 @@ static bool IsPassThroughTevStage(const Pica::TexturingRegs::TevStageConfig& sta
             stage.GetColorMultiplier() == 1 && stage.GetAlphaMultiplier() == 1);
 }
 
-// AGY OPTIMIZATION: Use mediump precision on GLES to utilize Mali Bifrost FP16 dual ALUs (2x throughput)
+// AGY OPTIMIZATION: Use mediump precision on GLES to utilize Mali Bifrost FP16 dual ALUs (2x
+// throughput)
 static constexpr char fragment_shader_precision_OES[] = R"(
 #if GL_ES
 precision mediump int;
@@ -1271,8 +1272,7 @@ void FragmentModule::DefineExtensions() {
 
     if (!profile.is_vulkan) {
         const bool use_fast_precision =
-            Settings::values.enable_performance_hacks.GetValue() &&
-            Settings::values.fast_shader_precision.GetValue();
+            Settings::PerformanceHacksActive() && Settings::values.fast_shader_precision.GetValue();
         out += (Settings::values.mii_compatibility_fixes.GetValue() || !use_fast_precision)
                    ? fragment_shader_precision_OES_mii_compat
                    : fragment_shader_precision_OES;

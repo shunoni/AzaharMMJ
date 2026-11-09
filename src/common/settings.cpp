@@ -178,29 +178,25 @@ void LogSettings() {
     log_setting("Debugging_UsePerGameSettings", values.use_per_game_settings.GetValue());
     log_setting("Debugging_PreventFrameLimiterCatchUp",
                 values.prevent_frame_limiter_catch_up.GetValue());
+    log_setting("Debugging_RealtimeGpu", values.realtime_gpu.GetValue());
     log_setting("Debugging_EnablePerformanceHacks", values.enable_performance_hacks.GetValue());
     log_setting("Debugging_UnsafeCpuOptimizations", values.unsafe_cpu_optimizations.GetValue());
     log_setting("Debugging_SkipSlowDrawFallback", values.skip_slow_draw_fallback.GetValue());
-    log_setting("Debugging_FastTextureInvalidation",
-                values.fast_texture_invalidation.GetValue());
+    log_setting("Debugging_FastTextureInvalidation", values.fast_texture_invalidation.GetValue());
     log_setting("Debugging_FastShaderPrecision", values.fast_shader_precision.GetValue());
     log_setting("Debugging_UnsafeSkipTextureFlush", values.unsafe_skip_texture_flush.GetValue());
     log_setting("Debugging_UnsafeSkipGpuSync", values.unsafe_skip_gpu_sync.GetValue());
     log_setting("Debugging_UnsafeSkipMipmaps", values.unsafe_skip_mipmaps.GetValue());
     log_setting("Debugging_UnsafeFastShaderMath", values.unsafe_fast_shader_math.GetValue());
     log_setting("Debugging_UnsafeSkipPageMarking", values.unsafe_skip_page_marking.GetValue());
-    log_setting("Debugging_UnsafeCullOccludedDraws",
-                values.unsafe_cull_occluded_draws.GetValue());
+    log_setting("Debugging_UnsafeCullOccludedDraws", values.unsafe_cull_occluded_draws.GetValue());
     log_setting("Debugging_UnsafeSkipShadowRendering",
                 values.unsafe_skip_shadow_rendering.GetValue());
     log_setting("Debugging_UnsafeDisableStencilTest",
                 values.unsafe_disable_stencil_test.GetValue());
-    log_setting("Debugging_UnsafeDisableAlphaBlend",
-                values.unsafe_disable_alpha_blend.GetValue());
-    log_setting("Debugging_UnsafeSkipTextureCopies",
-                values.unsafe_skip_texture_copies.GetValue());
-    log_setting("Debugging_GlUnsafeStreamBuffer",
-                values.gl_unsafe_stream_buffer.GetValue());
+    log_setting("Debugging_UnsafeDisableAlphaBlend", values.unsafe_disable_alpha_blend.GetValue());
+    log_setting("Debugging_UnsafeSkipTextureCopies", values.unsafe_skip_texture_copies.GetValue());
+    log_setting("Debugging_GlUnsafeStreamBuffer", values.gl_unsafe_stream_buffer.GetValue());
     log_setting("Debugging_UnsafeSkipUnresolvedTextureCopies",
                 values.unsafe_skip_unresolved_texture_copies.GetValue());
     log_setting("Debugging_UnsafeTrustCachedTextures",
@@ -213,13 +209,15 @@ bool IsConfiguringGlobal() {
 
 u64 GetShaderCacheSettingsHash() {
     u64 hash = 0x9e3779b97f4a7c15ULL;
-    const auto mix = [&hash](u64 value) {
-        hash ^= value + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-    };
+    const auto mix = [&hash](u64 value) { hash ^= value + 0x9e3779b9 + (hash << 6) + (hash >> 2); };
     mix(static_cast<u64>(values.enable_performance_hacks.GetValue()));
     mix(static_cast<u64>(values.fast_shader_precision.GetValue()));
     mix(static_cast<u64>(values.mii_compatibility_fixes.GetValue()));
     return hash;
+}
+
+bool PerformanceHacksActive() {
+    return values.enable_performance_hacks.GetValue() && !values.mii_compatibility_fixes.GetValue();
 }
 
 void SetConfiguringGlobal(bool is_global) {

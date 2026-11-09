@@ -93,6 +93,12 @@ public:
     Results GetLastStats();
 
     /**
+     * Returns how long the last system frame took, excluding frame limiting.
+     * Used by the real-time GPU pacing hack to decide when the GPU needs to skip a frame.
+     */
+    std::chrono::microseconds GetLastSystemFrameTime() const;
+
+    /**
      * Returns the arithmetic mean of all frametime values stored in the performance history.
      */
     double GetMeanFrametime() const;

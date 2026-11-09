@@ -16,6 +16,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Install git-archive-all
+        run: |
+          python3 -m venv "$RUNNER_TEMP/archive-venv"
+          "$RUNNER_TEMP/archive-venv/bin/pip" install git-archive-all
+          echo "$RUNNER_TEMP/archive-venv/bin" >> "$GITHUB_PATH"
       - name: Pack
         run: ./.ci/source.sh
       - name: Upload
@@ -92,7 +97,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.target }}-
       - name: Install tools
-        run: brew install ccache ninja spirv-tools
+        run: |
+          brew install ccache ninja spirv-tools ffmpeg@7
+          # Azahar currently expects FFmpeg 7's libavutil 59; Homebrew's default
+          # ffmpeg is newer and fails the version check.
+          brew link --force ffmpeg@7
       - name: Build
         run: ./.ci/macos.sh
       - name: Prepare outputs for caching
@@ -174,6 +183,17 @@ jobs:
       - name: Install extra tools (MSVC)
         if: ${{ matrix.target == 'msvc' }}
         run: choco install ccache ninja ptime wget
+      - name: Checkout vcpkg for FFmpeg 7.1.2 (MSVC)
+        if: ${{ matrix.target == 'msvc' }}
+        shell: pwsh
+        run: |
+          cd C:\vcpkg
+          git checkout 5087d22fd76fe1844ca492866055dea3c34e7f52
+          .\bootstrap-vcpkg.bat -disableMetrics
+      - name: Build FFmpeg (MSVC)
+        if: ${{ matrix.target == 'msvc' }}
+        run: vcpkg install
+          ffmpeg[avcodec,avfilter,avformat,swresample,aom,dav1d,mp3lame,opus,snappy,soxr,theora,vorbis,vpx,vulkan,x264,x265]:x64-windows-release
       - name: Install vulkan-sdk (MSVC)
         if: ${{ matrix.target == 'msvc' }}
         run: |

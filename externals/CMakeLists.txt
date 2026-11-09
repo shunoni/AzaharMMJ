@@ -129,6 +129,12 @@ if ("x86_64" IN_LIST ARCHITECTURE OR "arm64" IN_LIST ARCHITECTURE)
         set(DYNARMIC_FRONTENDS "A32" CACHE STRING "")
         set(DYNARMIC_USE_PRECOMPILED_HEADERS ${CITRA_USE_PRECOMPILED_HEADERS} CACHE BOOL "")
         add_subdirectory(dynarmic EXCLUDE_FROM_ALL)
+
+        if (MINGW AND TARGET dynarmic)
+            # MSYS2's libc++ does not pull <vector> in transitively, which dynarmic's
+            # ir_emitter.h relies on. Force-include it so the PCH and every TU compile.
+            target_compile_options(dynarmic PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-include vector>)
+        endif()
     endif()
 endif()
 
