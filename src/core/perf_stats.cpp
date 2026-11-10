@@ -93,6 +93,7 @@ void PerfStats::EndSystemFrame() {
 
     auto frame_end = Clock::now();
     const auto frame_time = frame_end - frame_begin;
+    last_system_frame_time = frame_time;
     if (current_index < perf_history.size()) {
         perf_history[current_index++] =
             std::chrono::duration<double, std::milli>(frame_time).count();
@@ -116,11 +117,7 @@ void PerfStats::EndGameFrame() {
 
 std::chrono::microseconds PerfStats::GetLastSystemFrameTime() const {
     std::scoped_lock lock{object_mutex};
-    if (current_index == 0) {
-        return std::chrono::microseconds::zero();
-    }
-    return std::chrono::duration_cast<std::chrono::microseconds>(
-        std::chrono::duration<double, std::milli>(perf_history[current_index - 1]));
+    return std::chrono::duration_cast<std::chrono::microseconds>(last_system_frame_time);
 }
 
 double PerfStats::GetMeanFrametime() const {

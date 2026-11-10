@@ -140,6 +140,8 @@ private:
     /// Stores an hour of historical frametime data useful for processing and tracking performance
     /// regressions with code changes.
     std::array<double, 216000> perf_history{};
+    /// Most recent system frame duration, kept current after perf_history fills up.
+    Clock::duration last_system_frame_time{Clock::duration::zero()};
 
     /// Point when the cumulative counters were reset
     Clock::time_point reset_point = Clock::now();

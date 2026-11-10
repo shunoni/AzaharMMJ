@@ -45,6 +45,7 @@ struct GPU::Impl {
     // emulator down to the render rate.
     bool realtime_skip_draws{};
     bool realtime_has_frame_time{};
+    u32 realtime_slow_frame_count{};
     std::chrono::microseconds realtime_debt{0};
     std::chrono::steady_clock::time_point realtime_last_draw{};
 
