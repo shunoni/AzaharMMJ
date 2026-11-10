@@ -501,6 +501,9 @@ void Config::Reload() {
         return;
     }
 
+    // New 3DS mode is controlled per title on Android; ignore the legacy global value.
+    Settings::values.is_new_3ds = true;
+
     std::ostringstream game_settings_name;
     game_settings_name << "GameSettings/" << std::uppercase << std::hex << std::setw(16)
                        << std::setfill('0') << program_id << ".ini";
@@ -515,6 +518,13 @@ void Config::Reload() {
 
     const bool legacy_global_value = Settings::values.use_per_game_settings.GetValue();
     const INIReader game_config_reader(game_config_buffer.c_str(), game_config_buffer.size());
+    const std::string per_game_new_3ds =
+        game_config_reader.Get("System", Settings::values.is_new_3ds.GetLabel(), "");
+    if (!per_game_new_3ds.empty()) {
+        Settings::values.is_new_3ds = game_config_reader.GetBoolean(
+            "System", Settings::values.is_new_3ds.GetLabel(), true);
+    }
+
     const std::string per_game_setting =
         game_config_reader.Get("Debugging", Settings::values.use_per_game_settings.GetLabel(), "");
     const bool use_per_game_settings =
@@ -533,5 +543,8 @@ void Config::Reload() {
     if (merged_config_reader->ParseError() >= 0) {
         android_config = std::move(merged_config_reader);
         ReadValues();
+        if (per_game_new_3ds.empty()) {
+            Settings::values.is_new_3ds = true;
+        }
     }
 }

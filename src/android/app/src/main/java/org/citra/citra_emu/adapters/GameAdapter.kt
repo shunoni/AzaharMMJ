@@ -42,6 +42,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.materialswitch.MaterialSwitch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,6 +54,8 @@ import org.citra.citra_emu.adapters.GameAdapter.GameViewHolder
 import org.citra.citra_emu.databinding.CardGameBinding
 import org.citra.citra_emu.databinding.DialogShortcutBinding
 import org.citra.citra_emu.features.cheats.ui.CheatsFragmentDirections
+import org.citra.citra_emu.features.settings.model.BooleanSetting
+import org.citra.citra_emu.features.settings.utils.SettingsFile
 import org.citra.citra_emu.fragments.IndeterminateProgressDialogFragment
 import org.citra.citra_emu.model.Game
 import org.citra.citra_emu.utils.BuildUtil
@@ -534,6 +537,41 @@ class GameAdapter(
         bottomSheetView.findViewById<MaterialButton>(R.id.about_game_play).setOnClickListener {
             val action = HomeNavigationDirections.actionGlobalEmulationActivity(holder.game)
             view.findNavController().navigate(action)
+        }
+
+        val gameId = String.format("%016X", game.titleId)
+        val new3dsSwitch = bottomSheetView.findViewById<MaterialSwitch>(R.id.game_new_3ds_mode)
+        var savedNew3dsMode = SettingsFile.readCustomGameBooleanSetting(
+            gameId,
+            BooleanSetting.NEW_3DS
+        ) ?: BooleanSetting.NEW_3DS.defaultValue
+        new3dsSwitch.isChecked = savedNew3dsMode
+        var suppressNew3dsChange = false
+        new3dsSwitch.setOnCheckedChangeListener { button, isChecked ->
+            if (suppressNew3dsChange) {
+                return@setOnCheckedChangeListener
+            }
+            if (SettingsFile.saveCustomGameSetting(
+                    gameId,
+                    BooleanSetting.NEW_3DS,
+                    isChecked.toString()
+                )
+            ) {
+                savedNew3dsMode = isChecked
+            } else {
+                suppressNew3dsChange = true
+                button.isChecked = savedNew3dsMode
+                suppressNew3dsChange = false
+                Toast.makeText(
+                    context,
+                    context.getString(
+                        R.string.error_saving,
+                        gameId,
+                        "Could not write the per-game settings file"
+                    ),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
 
         bottomSheetView.findViewById<TextView>(R.id.about_game_playtime).text =
