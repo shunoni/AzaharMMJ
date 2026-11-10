@@ -84,6 +84,9 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
         if (section.getSetting(setting.key!!) == null) {
             section.putSetting(setting)
         }
+        if (menuTag == Settings.SECTION_HACKS) {
+            settings.saveSetting(setting, SettingsFile.FILE_NAME_CONFIG)
+        }
     }
 
     fun loadSettingsList() {
