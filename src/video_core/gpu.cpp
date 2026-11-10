@@ -519,6 +519,14 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
             impl->system.perf_stats->StartSwap();
             impl->renderer->OnSkippedFrame();
             impl->system.perf_stats->EndSwap();
+            impl->realtime_hold_frame_after_skip = true;
+        } else if (impl->realtime_hold_frame_after_skip) {
+            // Show the last complete frame until one full draw frame has recovered from
+            // the skipped guest draws. This avoids presenting a transient empty framebuffer.
+            impl->system.perf_stats->StartSwap();
+            impl->renderer->OnSkippedFrame();
+            impl->system.perf_stats->EndSwap();
+            impl->realtime_hold_frame_after_skip = false;
         } else {
             impl->renderer->SwapBuffers();
             impl->realtime_last_draw = now;
@@ -567,6 +575,7 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
     impl->realtime_skip_draws = false;
     impl->realtime_has_frame_time = false;
     impl->realtime_slow_frame_count = 0;
+    impl->realtime_hold_frame_after_skip = false;
     impl->realtime_debt = std::chrono::microseconds::zero();
     impl->realtime_last_draw = {};
 
@@ -600,6 +609,7 @@ void GPU::RecreateRenderer(Frontend::EmuWindow& emu_window, Frontend::EmuWindow*
     impl->realtime_skip_draws = false;
     impl->realtime_has_frame_time = false;
     impl->realtime_slow_frame_count = 0;
+    impl->realtime_hold_frame_after_skip = false;
     impl->realtime_debt = std::chrono::microseconds::zero();
     impl->realtime_last_draw = {};
 
@@ -646,6 +656,7 @@ void GPU::ReleaseRenderer() {
     impl->realtime_skip_draws = false;
     impl->realtime_has_frame_time = false;
     impl->realtime_slow_frame_count = 0;
+    impl->realtime_hold_frame_after_skip = false;
     impl->realtime_debt = std::chrono::microseconds::zero();
     impl->realtime_last_draw = {};
 

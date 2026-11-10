@@ -46,6 +46,7 @@ struct GPU::Impl {
     bool realtime_skip_draws{};
     bool realtime_has_frame_time{};
     u32 realtime_slow_frame_count{};
+    bool realtime_hold_frame_after_skip{};
     std::chrono::microseconds realtime_debt{0};
     std::chrono::steady_clock::time_point realtime_last_draw{};
 

@@ -595,7 +595,7 @@ static const char* android_config_default_file_content = (BOOST_HANA_STRING(R"(
 
 # Keep guest time running at full speed when the host GPU cannot keep up by skipping
 # drawing work instead of slowing the whole emulator down. Requires performance hacks.
-# Expected visuals can be stale and framebuffer readback effects may glitch.
+# Holds the last complete frame through skipped draws and the first recovery frame.
 # 0 (default): Off, 1: On
 )") DECLARE_KEY(realtime_gpu) BOOST_HANA_STRING(R"(
 

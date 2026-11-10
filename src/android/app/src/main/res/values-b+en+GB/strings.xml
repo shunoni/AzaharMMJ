@@ -360,7 +360,7 @@
     <string name="instant_debug_log">Flush Log Output on Every Message</string>
     <string name="instant_debug_log_description">Immediately commits the debug log to file. Use this if Azahar crashes and the log output is being cut.</string>
     <string name="realtime_gpu">Real-time GPU</string>
-    <string name="realtime_gpu_description">Keeps guest time running at full speed when the GPU cannot keep up by skipping drawing work instead of slowing the whole emulator down. The game can run at 100% speed at low FPS, but effects can be stale and games that read back the screen may glitch. Requires performance hacks.</string>
+    <string name="realtime_gpu_description">Keeps guest time running at full speed when the GPU cannot keep up by skipping drawing work instead of slowing the whole emulator down. The last complete frame is held through skipped draws and the first recovery frame to avoid flashing an empty frame. FPS and effects may still be reduced or stale. Requires performance hacks.</string>
     <string name="unsafe_cpu_optimizations">Unsafe CPU Optimisations</string>
     <string name="unsafe_cpu_optimizations_description">Enables aggressive JIT optimisations that trade floating point accuracy and memory consistency for higher performance. Restart Azahar after changing this setting.</string>
     <string name="skip_slow_draw_fallback">Skip Slow Software Vertex Fallback</string>
