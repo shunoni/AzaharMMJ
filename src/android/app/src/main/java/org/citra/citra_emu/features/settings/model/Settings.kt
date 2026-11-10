@@ -100,11 +100,6 @@ class Settings {
             val filteredSection = SettingSection(updatedSection?.name ?: key)
             if (updatedSection != null) {
                 for (setting in updatedSection.settings.values) {
-                    // Global-only device settings are ignored in per-game files, so do not
-                    // let stale copies shadow the global values in the UI either.
-                    if (setting.key in GLOBAL_ONLY_DEBUG_KEYS) {
-                        continue
-                    }
                     filteredSection.putSetting(setting)
                 }
             }
@@ -135,14 +130,6 @@ class Settings {
                     val original = sections[sectionName] ?: continue
                     val gameSection = SettingSection(sectionName)
                     for (setting in original.settings.values) {
-                        // Performance hacks are device-level settings. Keeping them out of
-                        // the per-game snapshot lets global changes apply and stops old game
-                        // INIs from pinning stale values.
-                        if (sectionName == SECTION_DEBUG &&
-                            setting.key in GLOBAL_ONLY_DEBUG_KEYS
-                        ) {
-                            continue
-                        }
                         gameSection.putSetting(setting)
                     }
                     if (gameSection.settings.isNotEmpty()) {
@@ -150,31 +137,10 @@ class Settings {
                     }
                 }
                 SettingsFile.saveCustomGameSettings(gameId!!, gameSections, view)
-                saveGlobalOnlySettings(view)
             } else {
                 saveGlobalSettings(view)
             }
         }
-    }
-
-    /**
-     * Writes device-level performance hack settings to the global config. These must
-     * not be overridden by a per-game INI.
-     */
-    private fun saveGlobalOnlySettings(view: SettingsActivityView) {
-        val original = sections[SECTION_DEBUG] ?: return
-        val globalSection = SettingSection(SECTION_DEBUG)
-        for (setting in original.settings.values) {
-            if (setting.key in GLOBAL_ONLY_DEBUG_KEYS) {
-                globalSection.putSetting(setting)
-            }
-        }
-        if (globalSection.settings.isEmpty()) {
-            return
-        }
-        val iniSections = TreeMap<String, SettingSection?>()
-        iniSections[SECTION_DEBUG] = globalSection
-        SettingsFile.saveFile(SettingsFile.FILE_NAME_CONFIG, iniSections, view)
     }
 
     private fun saveGlobalSettings(view: SettingsActivityView) {
@@ -200,9 +166,7 @@ class Settings {
     }
 
     fun saveSetting(setting: AbstractSetting, filename: String) {
-        if (!TextUtils.isEmpty(gameId) && BooleanSetting.USE_PER_GAME_SETTINGS.boolean &&
-            setting.key !in GLOBAL_ONLY_DEBUG_KEYS
-        ) {
+        if (!TextUtils.isEmpty(gameId) && BooleanSetting.USE_PER_GAME_SETTINGS.boolean) {
             SettingsFile.saveCustomGameSetting(gameId!!, setting)
         } else {
             SettingsFile.saveFile(filename, setting)
@@ -211,31 +175,6 @@ class Settings {
 
     companion object {
         private var loadGeneration = 0
-
-        /**
-         * Performance hacks that must always come from the global config. These are
-         * device-level toggles; a per-game INI snapshot must not override them.
-         */
-        val GLOBAL_ONLY_DEBUG_KEYS: Set<String?> = setOf(
-            BooleanSetting.REALTIME_GPU.key,
-            BooleanSetting.ENABLE_PERFORMANCE_HACKS.key,
-            BooleanSetting.UNSAFE_CPU_OPTIMIZATIONS.key,
-            BooleanSetting.SKIP_SLOW_DRAW_FALLBACK.key,
-            BooleanSetting.FAST_TEXTURE_INVALIDATION.key,
-            BooleanSetting.FAST_SHADER_PRECISION.key,
-            BooleanSetting.UNSAFE_SKIP_TEXTURE_FLUSH.key,
-            BooleanSetting.UNSAFE_SKIP_GPU_SYNC.key,
-            BooleanSetting.UNSAFE_SKIP_MIPMAPS.key,
-            BooleanSetting.UNSAFE_FAST_SHADER_MATH.key,
-            BooleanSetting.UNSAFE_SKIP_PAGE_MARKING.key,
-            BooleanSetting.UNSAFE_SKIP_SHADOW_RENDERING.key,
-            BooleanSetting.UNSAFE_DISABLE_STENCIL_TEST.key,
-            BooleanSetting.UNSAFE_DISABLE_ALPHA_BLEND.key,
-            BooleanSetting.UNSAFE_SKIP_TEXTURE_COPIES.key,
-            BooleanSetting.GL_UNSAFE_STREAM_BUFFER.key,
-            BooleanSetting.UNSAFE_SKIP_UNRESOLVED_TEXTURE_COPIES.key,
-            BooleanSetting.UNSAFE_TRUST_CACHED_TEXTURES.key,
-        )
 
         const val SECTION_CORE = "Core"
         const val SECTION_SYSTEM = "System"

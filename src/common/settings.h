@@ -713,7 +713,7 @@ void LogSettings();
 // Hash of the settings that affect generated shader source. Used to invalidate shader caches.
 u64 GetShaderCacheSettingsHash();
 
-// Whether the user has enabled performance hacks globally.
+// Whether the user has enabled performance hacks.
 inline bool PerformanceHacksActive() {
     return values.enable_performance_hacks.GetValue();
 }

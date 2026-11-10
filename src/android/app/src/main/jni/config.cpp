@@ -52,47 +52,8 @@ std::string TrimIniWhitespace(std::string value) {
     return value;
 }
 
-// Performance hacks are device-level settings, not per-game ones. Older builds used
-// to snapshot every setting into the per-game INI, which meant a stale game file could
-// keep re-enabling hacks even after the user disabled the master switch globally.
-// Ignore these keys when merging a per-game config so global hack changes always win.
-// The Mii compatibility fixes intentionally stay per-game, since they trade speed for
-// accuracy (and when enabled they force the safe paths anyway).
-constexpr std::array global_only_debug_keys{
-    std::string_view{"realtime_gpu"},
-    std::string_view{"enable_performance_hacks"},
-    std::string_view{"unsafe_cpu_optimizations"},
-    std::string_view{"skip_slow_draw_fallback"},
-    std::string_view{"fast_texture_invalidation"},
-    std::string_view{"fast_shader_precision"},
-    std::string_view{"unsafe_skip_texture_flush"},
-    std::string_view{"unsafe_skip_gpu_sync"},
-    std::string_view{"unsafe_skip_mipmaps"},
-    std::string_view{"unsafe_fast_shader_math"},
-    std::string_view{"unsafe_skip_page_marking"},
-    std::string_view{"unsafe_skip_shadow_rendering"},
-    std::string_view{"unsafe_disable_stencil_test"},
-    std::string_view{"unsafe_disable_alpha_blend"},
-    std::string_view{"unsafe_skip_texture_copies"},
-    std::string_view{"gl_unsafe_stream_buffer"},
-    std::string_view{"unsafe_skip_unresolved_texture_copies"},
-    std::string_view{"unsafe_trust_cached_textures"},
-};
-
-bool IsGlobalOnlyDebugKey(std::string_view section, std::string_view key) {
-    if (NormalizeIniName(std::string{section}) != "debugging") {
-        return false;
-    }
-    const std::string normalized_key = NormalizeIniName(std::string{key});
-    const std::string_view normalized_key_view{normalized_key};
-    return std::ranges::any_of(global_only_debug_keys, [&](std::string_view candidate) {
-        return candidate == normalized_key_view;
-    });
-}
-
 void AddIniBuffer(std::string_view buffer,
-                  std::map<std::pair<std::string, std::string>, IniValue>& values,
-                  bool skip_global_only_keys = false) {
+                  std::map<std::pair<std::string, std::string>, IniValue>& values) {
     std::istringstream input{std::string{buffer}};
     std::string section;
     std::string line;
@@ -112,9 +73,6 @@ void AddIniBuffer(std::string_view buffer,
         std::string key = TrimIniWhitespace(line.substr(0, equals));
         std::string value = TrimIniWhitespace(line.substr(equals + 1));
         if (!key.empty()) {
-            if (skip_global_only_keys && IsGlobalOnlyDebugKey(section, key)) {
-                continue;
-            }
             values[{NormalizeIniName(section), NormalizeIniName(key)}] =
                 IniValue{section, std::move(key), std::move(value)};
         }
@@ -124,7 +82,7 @@ void AddIniBuffer(std::string_view buffer,
 std::string MergeIniBuffers(std::string_view global_config, std::string_view game_config) {
     std::map<std::pair<std::string, std::string>, IniValue> values;
     AddIniBuffer(global_config, values);
-    AddIniBuffer(game_config, values, /*skip_global_only_keys=*/true);
+    AddIniBuffer(game_config, values);
 
     std::ostringstream merged;
     std::string current_section;
