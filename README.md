@@ -2,7 +2,7 @@ DOWNLOAD ALL BUILDS FROM THE ACTIONS TAB!!! If you have issues with it, you can 
 
 Feel free to contribute (:
 
-Azahar MMJ is a lightweight fork of Azahar Plus with performance tweaks for Android-based dual screen devices such as the Anbernic RGDS, which is the device it is tailored for. For most dual screen devices, this emulator is not needed as normal emulators should perform fine. Less powerful ones, like the RGDS, cannot run normal emulators. This emulator is tailored for those devices that need the extra performance to run 3DS games. It uses various hacks from Citra MMJ (as implied by the name) and some of my own, and merges them into one big set of performance tweaks. In other words, we prioritize speed over accuracy.
+Azahar MMJ is a lightweight fork of Azahar Plus with performance tweaks and QOL features for Android-based dual screen devices such as the Anbernic RGDS, which is the device it is tailored for. For most dual screen devices, this emulator is not needed as normal emulators should perform fine. Less powerful ones, like the RGDS, cannot run normal emulators. This emulator is tailored for those devices that need the extra performance to run 3DS games. It uses various hacks from Citra MMJ (as implied by the name) and some of my own, and merges them into one big set of performance tweaks. In other words, we prioritize speed over accuracy.
 
 ![App Logo](https://github.com/shunoni/AzahaRGDS/blob/AzaharPlus/logo.jpg?raw=true)
 
