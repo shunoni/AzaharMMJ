@@ -542,7 +542,6 @@ void QtConfig::ReadDebuggingValues() {
     ReadBasicSetting(Settings::values.unsafe_skip_mipmaps);
     ReadBasicSetting(Settings::values.unsafe_fast_shader_math);
     ReadBasicSetting(Settings::values.unsafe_skip_page_marking);
-    ReadBasicSetting(Settings::values.unsafe_cull_occluded_draws);
     ReadBasicSetting(Settings::values.unsafe_skip_shadow_rendering);
     ReadBasicSetting(Settings::values.unsafe_disable_stencil_test);
     ReadBasicSetting(Settings::values.unsafe_disable_alpha_blend);
@@ -1154,7 +1153,6 @@ void QtConfig::SaveDebuggingValues() {
     WriteBasicSetting(Settings::values.unsafe_skip_mipmaps);
     WriteBasicSetting(Settings::values.unsafe_fast_shader_math);
     WriteBasicSetting(Settings::values.unsafe_skip_page_marking);
-    WriteBasicSetting(Settings::values.unsafe_cull_occluded_draws);
     WriteBasicSetting(Settings::values.unsafe_skip_shadow_rendering);
     WriteBasicSetting(Settings::values.unsafe_disable_stencil_test);
     WriteBasicSetting(Settings::values.unsafe_disable_alpha_blend);

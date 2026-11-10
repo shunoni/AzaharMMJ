@@ -189,9 +189,8 @@ bool RasterizerCache<T>::AccelerateTextureCopy(const Pica::DisplayTransferConfig
     // AGY SPEED OPTIMIZATION: Skip GPU texture-to-texture copies entirely.
     // Render-to-texture effects reuse stale contents but the emulator keeps going.
     // The Mii compatibility fixes need real texture synchronization.
-    if (Settings::PerformanceHacksActive() &&
-        Settings::values.unsafe_skip_texture_copies.GetValue() &&
-        !Settings::values.mii_compatibility_fixes.GetValue()) {
+    if (Settings::TextureCacheHacksActive() &&
+        Settings::values.unsafe_skip_texture_copies.GetValue()) {
         return true;
     }
 
@@ -240,9 +239,8 @@ bool RasterizerCache<T>::AccelerateTextureCopy(const Pica::DisplayTransferConfig
         // AGY SPEED OPTIMIZATION (Citra MMJ skip_texture_copy): the source surface
         // cannot be resolved, so skip the copy instead of falling back to a slow
         // path. This is the safer per-game variant used for Mario Kart 7.
-        return Settings::PerformanceHacksActive() &&
-               Settings::values.unsafe_skip_unresolved_texture_copies.GetValue() &&
-               !Settings::values.mii_compatibility_fixes.GetValue();
+        return Settings::TextureCacheHacksActive() &&
+               Settings::values.unsafe_skip_unresolved_texture_copies.GetValue();
     }
 
     const SurfaceParams src_info = slot_surfaces[src_surface_id];
@@ -1290,9 +1288,8 @@ void RasterizerCache<T>::FlushRegion(PAddr addr, u32 size, SurfaceId flush_surfa
     // This is extremely dangerous for accuracy but removes the most expensive
     // synchronization path on low-power devices. The Mii compatibility fixes need
     // the readback to keep CPU and GPU texture data in sync.
-    if (Settings::PerformanceHacksActive() &&
-        Settings::values.unsafe_skip_texture_flush.GetValue() &&
-        !Settings::values.mii_compatibility_fixes.GetValue()) {
+    if (Settings::TextureCacheHacksActive() &&
+        Settings::values.unsafe_skip_texture_flush.GetValue()) {
         return;
     }
 
@@ -1370,13 +1367,11 @@ void RasterizerCache<T>::InvalidateRegion(PAddr addr, u32 size, SurfaceId region
             // texture even when the CPU writes this memory instead of flushing and
             // removing it. Textures can go stale, but streaming games get much faster.
             // The Mii compatibility fixes need the flush to keep faces correct.
-            if (Settings::PerformanceHacksActive() &&
-                Settings::values.unsafe_trust_cached_textures.GetValue() &&
-                !Settings::values.mii_compatibility_fixes.GetValue()) {
+            if (Settings::TextureCacheHacksActive() &&
+                Settings::values.unsafe_trust_cached_textures.GetValue()) {
                 return;
             }
-            if (Settings::values.mii_compatibility_fixes.GetValue() ||
-                !Settings::PerformanceHacksActive() ||
+            if (!Settings::TextureCacheHacksActive() ||
                 !Settings::values.fast_texture_invalidation.GetValue()) {
                 // Preserve GPU-rendered bytes before a game partially updates this memory on CPU.
                 FlushRegion(surface.addr, surface.size, surface_id);
@@ -1497,7 +1492,7 @@ void RasterizerCache<T>::UpdatePagesCachedCount(PAddr addr, u32 size, int delta)
     // AGY SPEED OPTIMIZATION: Skip cached-page reference tracking entirely. The
     // backing memory pages are never switched to rasterizer-cached pages, which
     // avoids all page table churn at the cost of CPU/GPU coherence.
-    if (Settings::PerformanceHacksActive() &&
+    if (Settings::TextureCacheHacksActive() &&
         Settings::values.unsafe_skip_page_marking.GetValue()) {
         return;
     }

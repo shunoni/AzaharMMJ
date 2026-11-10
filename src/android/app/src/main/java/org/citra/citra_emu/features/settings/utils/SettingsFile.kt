@@ -15,6 +15,7 @@ import java.util.TreeMap
 import org.citra.citra_emu.CitraApplication
 import org.citra.citra_emu.NativeLibrary
 import org.citra.citra_emu.R
+import org.citra.citra_emu.features.settings.model.AbstractBooleanSetting
 import org.citra.citra_emu.features.settings.model.AbstractSetting
 import org.citra.citra_emu.features.settings.model.BooleanSetting
 import org.citra.citra_emu.features.settings.model.FloatSetting
@@ -154,18 +155,33 @@ object SettingsFile {
     }
 
     fun saveCustomGameSetting(gameId: String, setting: AbstractSetting): Boolean {
+        return saveCustomGameSetting(gameId, setting, setting.valueAsString)
+    }
+
+    fun saveCustomGameSetting(
+        gameId: String,
+        setting: AbstractSetting,
+        value: String
+    ): Boolean {
         val ini = getCustomGameSettingsFile(gameId, true) ?: return false
         try {
             val context: Context = CitraApplication.appContext
-            // A freshly created SAF document can briefly fail to open or parse. Fall back
-            // to an in-memory INI instead of refusing to persist the setting.
             val writer = try {
-                context.contentResolver.openInputStream(ini.uri)?.use { Wini(it) }
+                val inputStream = context.contentResolver.openInputStream(ini.uri)
+                if (inputStream == null) {
+                    if (ini.length() == 0L) {
+                        Wini()
+                    } else {
+                        return false
+                    }
+                } else {
+                    inputStream.use { Wini(it) }
+                }
             } catch (e: Exception) {
                 Log.error("[SettingsFile] Error reading game config $gameId.ini: ${e.message}")
-                null
-            } ?: Wini()
-            writer.put(mapSectionNameToIni(setting.section!!), setting.key, setting.valueAsString)
+                if (ini.length() == 0L) Wini() else return false
+            }
+            writer.put(mapSectionNameToIni(setting.section!!), setting.key, value)
             val outputStream = context.contentResolver.openOutputStream(ini.uri, "wt")
                 ?: return false
             outputStream.use {
@@ -179,12 +195,38 @@ object SettingsFile {
         }
     }
 
-    fun saveCurrentGameSetting(setting: AbstractSetting, fileName: String = FILE_NAME_CONFIG) {
-        // Device-level toggles always belong to the global config.
-        if (setting.key in Settings.GLOBAL_ONLY_DEBUG_KEYS) {
-            saveFile(fileName, setting)
-            return
+    fun readCustomGameBooleanSetting(
+        gameId: String,
+        setting: AbstractBooleanSetting
+    ): Boolean? {
+        val ini = getCustomGameSettingsFile(gameId, false) ?: return null
+        return try {
+            val inputStream = CitraApplication.appContext.contentResolver.openInputStream(ini.uri)
+                ?: return null
+            inputStream.use {
+                val value = Wini(it).get(mapSectionNameToIni(setting.section!!), setting.key)
+                    ?: return null
+                val parsed = when (value.trim().lowercase()) {
+                    "true", "1" -> true
+                    "false", "0" -> false
+                    else -> null
+                }
+                parsed.also {
+                    if (parsed == null) {
+                        Log.error(
+                            "[SettingsFile] Invalid boolean value for ${setting.key} in " +
+                                "$gameId.ini: $value"
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.error("[SettingsFile] Error reading game config $gameId.ini: ${e.message}")
+            null
         }
+    }
+
+    fun saveCurrentGameSetting(setting: AbstractSetting, fileName: String = FILE_NAME_CONFIG) {
         if (NativeLibrary.isRunning()) {
             val gameId = String.format("%016X", NativeLibrary.getRunningTitleId())
             if (isPerGameSettingsEnabled(gameId)) {

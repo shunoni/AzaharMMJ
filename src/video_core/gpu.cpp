@@ -510,7 +510,8 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
         // Never leave the screen unchanged for longer than this, even if the GPU is so
         // slow that it cannot repay its debt. 200 ms is about five presented frames a second.
         constexpr auto max_skip_time = std::chrono::milliseconds(200);
-        // Ignore small scheduling jitter so a steady 100% frame does not start skipping.
+        // Require two consecutive slow frames so isolated scheduling or shader-compilation
+        // stalls do not trigger visible frame skips.
         constexpr auto skip_threshold = std::chrono::milliseconds(1);
         const auto now = std::chrono::steady_clock::now();
 
@@ -518,6 +519,14 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
             impl->system.perf_stats->StartSwap();
             impl->renderer->OnSkippedFrame();
             impl->system.perf_stats->EndSwap();
+            impl->realtime_hold_frame_after_skip = true;
+        } else if (impl->realtime_hold_frame_after_skip) {
+            // Show the last complete frame until one full draw frame has recovered from
+            // the skipped guest draws. This avoids presenting a transient empty framebuffer.
+            impl->system.perf_stats->StartSwap();
+            impl->renderer->OnSkippedFrame();
+            impl->system.perf_stats->EndSwap();
+            impl->realtime_hold_frame_after_skip = false;
         } else {
             impl->renderer->SwapBuffers();
             impl->realtime_last_draw = now;
@@ -528,7 +537,17 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
         // first frame has no useful start point, so do not let it build fake debt.
         if (impl->realtime_has_frame_time) {
             const auto work = impl->system.perf_stats->GetLastSystemFrameTime();
-            impl->realtime_debt += work - frame_budget;
+            if (work > frame_budget) {
+                if (impl->realtime_slow_frame_count < 2) {
+                    ++impl->realtime_slow_frame_count;
+                }
+                if (impl->realtime_slow_frame_count >= 2) {
+                    impl->realtime_debt += work - frame_budget;
+                }
+            } else {
+                impl->realtime_slow_frame_count = 0;
+                impl->realtime_debt += work - frame_budget;
+            }
             impl->realtime_debt =
                 std::clamp(impl->realtime_debt, std::chrono::microseconds{0},
                            std::chrono::duration_cast<std::chrono::microseconds>(max_debt));
@@ -555,6 +574,8 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
     impl->pica.SetSkipDraws(false);
     impl->realtime_skip_draws = false;
     impl->realtime_has_frame_time = false;
+    impl->realtime_slow_frame_count = 0;
+    impl->realtime_hold_frame_after_skip = false;
     impl->realtime_debt = std::chrono::microseconds::zero();
     impl->realtime_last_draw = {};
 
@@ -587,6 +608,8 @@ void GPU::RecreateRenderer(Frontend::EmuWindow& emu_window, Frontend::EmuWindow*
     impl->pica.SetSkipDraws(false);
     impl->realtime_skip_draws = false;
     impl->realtime_has_frame_time = false;
+    impl->realtime_slow_frame_count = 0;
+    impl->realtime_hold_frame_after_skip = false;
     impl->realtime_debt = std::chrono::microseconds::zero();
     impl->realtime_last_draw = {};
 
@@ -632,6 +655,8 @@ void GPU::ReleaseRenderer() {
     impl->pica.SetSkipDraws(false);
     impl->realtime_skip_draws = false;
     impl->realtime_has_frame_time = false;
+    impl->realtime_slow_frame_count = 0;
+    impl->realtime_hold_frame_after_skip = false;
     impl->realtime_debt = std::chrono::microseconds::zero();
     impl->realtime_last_draw = {};
 

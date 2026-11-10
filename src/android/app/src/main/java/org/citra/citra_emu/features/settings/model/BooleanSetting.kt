@@ -74,11 +74,6 @@ enum class BooleanSetting(
         Settings.SECTION_DEBUG,
         false
     ),
-    UNSAFE_CULL_OCCLUDED_DRAWS(
-        SettingKeys.unsafe_cull_occluded_draws(),
-        Settings.SECTION_DEBUG,
-        false
-    ),
     UNSAFE_SKIP_SHADOW_RENDERING(
         SettingKeys.unsafe_skip_shadow_rendering(),
         Settings.SECTION_DEBUG,

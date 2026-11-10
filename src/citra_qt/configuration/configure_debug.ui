@@ -353,10 +353,10 @@
       <item row="8" column="0">
        <widget class="QCheckBox" name="realtime_gpu">
         <property name="toolTip">
-         <string>Keeps guest time running at full speed when the GPU cannot keep up by skipping drawing work instead of slowing the whole emulator down. The game can run at 100% speed at low FPS, but effects can be stale and games that read back the screen may glitch. Requires performance hacks.</string>
+         <string>Keeps guest time running at full speed when the GPU cannot keep up by skipping drawing work instead of slowing the whole emulator down. The last complete frame is held through skipped draws and the first recovery frame to avoid flashing an empty frame. FPS and effects may still be reduced or stale. Requires performance hacks.</string>
         </property>
         <property name="text">
-         <string>Real-time GPU (skip drawing to keep 100% speed)</string>
+         <string>Real-time GPU (hold the last complete frame while skipping draws)</string>
         </property>
        </widget>
       </item>

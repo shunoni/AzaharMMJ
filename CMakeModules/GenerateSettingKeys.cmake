@@ -136,7 +136,6 @@ foreach(KEY IN ITEMS
     "unsafe_skip_mipmaps"
     "unsafe_fast_shader_math"
     "unsafe_skip_page_marking"
-    "unsafe_cull_occluded_draws"
     "unsafe_skip_shadow_rendering"
     "unsafe_disable_stencil_test"
     "unsafe_disable_alpha_blend"

@@ -84,6 +84,9 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
         if (section.getSetting(setting.key!!) == null) {
             section.putSetting(setting)
         }
+        if (menuTag == Settings.SECTION_HACKS) {
+            settings.saveSetting(setting, SettingsFile.FILE_NAME_CONFIG)
+        }
     }
 
     fun loadSettingsList() {
@@ -406,15 +409,6 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                 override val defaultValue = "AZAHAR"
             }
             add(HeaderSetting(R.string.emulation_settings))
-            add(
-                SwitchSetting(
-                    BooleanSetting.NEW_3DS,
-                    R.string.new_3ds,
-                    0,
-                    BooleanSetting.NEW_3DS.key,
-                    BooleanSetting.NEW_3DS.defaultValue
-                )
-            )
             add(
                 SwitchSetting(
                     BooleanSetting.LLE_APPLETS,
@@ -2061,15 +2055,6 @@ class SettingsFragmentPresenter(private val fragmentView: SettingsFragmentView) 
                     R.string.unsafe_skip_page_marking_description,
                     BooleanSetting.UNSAFE_SKIP_PAGE_MARKING.key,
                     BooleanSetting.UNSAFE_SKIP_PAGE_MARKING.defaultValue
-                )
-            )
-            add(
-                SwitchSetting(
-                    BooleanSetting.UNSAFE_CULL_OCCLUDED_DRAWS,
-                    R.string.unsafe_cull_occluded_draws,
-                    R.string.unsafe_cull_occluded_draws_description,
-                    BooleanSetting.UNSAFE_CULL_OCCLUDED_DRAWS.key,
-                    BooleanSetting.UNSAFE_CULL_OCCLUDED_DRAWS.defaultValue
                 )
             )
             add(HeaderSetting(R.string.hacks_extreme, R.string.hacks_extreme_description))

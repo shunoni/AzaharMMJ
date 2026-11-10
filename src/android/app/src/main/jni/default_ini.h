@@ -595,7 +595,7 @@ static const char* android_config_default_file_content = (BOOST_HANA_STRING(R"(
 
 # Keep guest time running at full speed when the host GPU cannot keep up by skipping
 # drawing work instead of slowing the whole emulator down. Requires performance hacks.
-# Expected visuals can be stale and framebuffer readback effects may glitch.
+# Holds the last complete frame through skipped draws and the first recovery frame.
 # 0 (default): Off, 1: On
 )") DECLARE_KEY(realtime_gpu) BOOST_HANA_STRING(R"(
 
@@ -645,12 +645,6 @@ static const char* android_config_default_file_content = (BOOST_HANA_STRING(R"(
 # memory are no longer kept coherent, which can cause stale textures. Restart required.
 # 0 (default): Off, 1: On
 )") DECLARE_KEY(unsafe_skip_page_marking) BOOST_HANA_STRING(R"(
-
-# [Vulkan only] Skip heavy draws that were fully hidden behind other geometry in
-# recent frames. Big speedup in 3D scenes, but objects can pop in at screen edges
-# and some effects may flicker.
-# 0 (default): Off, 1: On
-)") DECLARE_KEY(unsafe_cull_occluded_draws) BOOST_HANA_STRING(R"(
 
 # Skip the game's shadow-map rendering passes entirely. Faster, but shadows and
 # some lighting effects will be missing or stale.

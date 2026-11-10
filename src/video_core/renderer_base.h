@@ -47,7 +47,7 @@ public:
     /// Finalize rendering the guest frame and draw into the presentation texture
     virtual void SwapBuffers() = 0;
 
-    /// Preserve frame timing and renderer housekeeping when drawing is skipped.
+    /// Preserve frame timing and housekeeping without replacing the last presented frame.
     virtual void OnSkippedFrame() {
         EndFrame();
     }

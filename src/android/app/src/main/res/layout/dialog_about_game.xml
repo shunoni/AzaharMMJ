@@ -160,6 +160,16 @@
 
         </LinearLayout>
 
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/game_new_3ds_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/new_3ds"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/horizontal_layout" />
+
         <LinearLayout
             android:id="@+id/horizontal_layout_2"
             style="@style/ThemeOverlay.Material3.Button.IconButton.Filled.Tonal"
@@ -170,7 +180,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/horizontal_layout">
+            app:layout_constraintTop_toBottomOf="@id/game_new_3ds_mode">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/cheats"
